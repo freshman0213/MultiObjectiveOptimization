@@ -172,17 +172,30 @@ def train_multi_task(param_file):
 
             # Scaled back-propagation
             optimizer.zero_grad()
-            rep, _ = model['rep'](images, mask)
-            for i, t in enumerate(tasks):
-                out_t, _ = model[t](rep, masks[t])
-                loss_t = loss_fn[t](out_t, labels[t])
-                loss_data[t] = loss_t.item() 
-                if i > 0:
-                    loss = loss + scale[t]*loss_t
-                else:
-                    loss = scale[t]*loss_t
-            loss.backward()
-            optimizer.step()
+            out = model['rep'](images, mask)
+            if len(out) == 3: 
+                for i, t in enumerate(tasks):
+                    out_t, _ = model[t](out[i], masks[t])
+                    loss_t = loss_fn[t](out_t, labels[t])
+                    loss_data[t] = loss_t.item() 
+                    if i > 0:
+                        loss = loss + scale[t]*loss_t
+                    else:
+                        loss = scale[t]*loss_t
+                loss.backward()
+                optimizer.step()
+            else: 
+                rep = out[0]
+                for i, t in enumerate(tasks):
+                    out_t, _ = model[t](rep, masks[t])
+                    loss_t = loss_fn[t](out_t, labels[t])
+                    loss_data[t] = loss_t.item() 
+                    if i > 0:
+                        loss = loss + scale[t]*loss_t
+                    else:
+                        loss = scale[t]*loss_t
+                loss.backward()
+                optimizer.step()
 
             writer.add_scalar('training_loss', loss.item(), n_iter)
             for t in tasks:
@@ -209,13 +222,23 @@ def train_multi_task(param_file):
                     labels_val[t] = batch_val[i+1]
                     labels_val[t] = labels_val[t].to(DEVICE)
 
-                val_rep, _ = model['rep'](val_images, None)
-                for t in tasks:
-                    out_t_val, _ = model[t](val_rep, None)
-                    loss_t = loss_fn[t](out_t_val, labels_val[t])
-                    tot_loss['all'] += loss_t.item()
-                    tot_loss[t] += loss_t.item()
-                    metric[t].update(out_t_val, labels_val[t])
+                val_rep = model['rep'](val_images, None)
+                if len(val_rep) == 3:
+                    val_rep = val_rep[0:2]
+                    for i, t in enumerate(tasks):
+                        out_t_val, _ = model[t](val_rep[i], None)
+                        loss_t = loss_fn[t](out_t_val, labels_val[t])
+                        tot_loss['all'] += loss_t.item()
+                        tot_loss[t] += loss_t.item()
+                        metric[t].update(out_t_val, labels_val[t])
+                else:
+                    val_rep = val_rep[0]
+                    for t in tasks:
+                        out_t_val, _ = model[t](val_rep, None)
+                        loss_t = loss_fn[t](out_t_val, labels_val[t])
+                        tot_loss['all'] += loss_t.item()
+                        tot_loss[t] += loss_t.item()
+                        metric[t].update(out_t_val, labels_val[t])
                 num_val_batches+=1
 
         for t in tasks:
