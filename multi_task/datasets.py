@@ -18,7 +18,7 @@ def get_dataset(params, configs):
     if 'dataset' not in params:
         print('ERROR: No dataset is specified')
 
-    if 'mnist' in params['dataset']:
+    if 'mnist' in params['dataset'] or 'mnist_film' in params['dataset']:
         train_dst = MNIST(root=configs['mnist']['path'], train=True, download=True, transform=global_transformer(), multi=True)
         train_loader = torch.utils.data.DataLoader(train_dst, batch_size=params['batch_size'], shuffle=True, num_workers=4)
 

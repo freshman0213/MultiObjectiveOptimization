@@ -62,7 +62,7 @@ def l1_loss_instance(input, target, val=False):
     return lss 
 
 def get_loss(params):
-    if 'mnist' in params['dataset']:
+    if 'mnist' in params['dataset'] or 'mnist_film' in params['dataset']:
         loss_fn = {}
         for t in params['tasks']:
             loss_fn[t] = nll 

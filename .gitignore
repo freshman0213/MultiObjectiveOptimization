@@ -1,0 +1,5 @@
+*.pyc
+*.pt
+runs/
+saved_models/
+PATH_FOR_MULTIMNIST_DATASET/

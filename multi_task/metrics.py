@@ -75,7 +75,7 @@ class RunningMetric(object):
 
 def get_metrics(params):
     met = {}
-    if 'mnist' in params['dataset']:
+    if 'mnist' in params['dataset'] or 'mnist_film' in params['dataset']:
         for t in params['tasks']:
             met[t] = RunningMetric(metric_type = 'ACC')
     if 'cityscapes' in params['dataset']:

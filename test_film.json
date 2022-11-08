@@ -1,0 +1,12 @@
+{
+    "optimizer": "SGD", 
+    "batch_size": 256,
+    "lr": 0.01,
+    "dataset": "mnist_film",
+    "tasks": ["L", "R"],
+    "normalization_type": "loss+",
+    "algorithm": "",
+    "use_approximation": true,
+    "scales": {"L":0.5, "R":0.5},
+    "parallel": true
+}
