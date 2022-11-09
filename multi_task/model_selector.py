@@ -14,11 +14,11 @@ def get_model(params):
     if 'mnist_film' in data:
         print("CALL MultiFilmLeNetR")
         model = {}
-        model['rep'] = MultiFilmLeNetR(params)
+        model['rep'] = MultiFilmLeNetR()
         if params['parallel']:
             model['rep'] = nn.DataParallel(model['rep'])
         model['rep'].to(DEVICE)
-        model['L'] = MultiLeNetO(params)
+        model['L'] = MultiLeNetO()
         if params['parallel']:
             model['L'] = nn.DataParallel(model['L'])
         model['L'].to(DEVICE)
@@ -27,17 +27,17 @@ def get_model(params):
     if 'mnist' in data:
         print("CALL MultiLeNetR")
         model = {}
-        model['rep'] = MultiLeNetR(params)
+        model['rep'] = MultiLeNetR()
         if params['parallel']:
             model['rep'] = nn.DataParallel(model['rep'])
         model['rep'].to(DEVICE)
         if 'L' in params['tasks']:
-            model['L'] = MultiLeNetO(params)
+            model['L'] = MultiLeNetO()
             if params['parallel']:
                 model['L'] = nn.DataParallel(model['L'])
             model['L'].to(DEVICE)
         if 'R' in params['tasks']:
-            model['R'] = MultiLeNetO(params)
+            model['R'] = MultiLeNetO()
             if params['parallel']:
                 model['R'] = nn.DataParallel(model['R'])
             model['R'].to(DEVICE)
