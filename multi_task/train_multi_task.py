@@ -57,6 +57,7 @@ def train_multi_task(params):
         optimizer = torch.optim.Adam(model_params, lr=params['lr'])
     elif 'SGD' in params['optimizer']:
         optimizer = torch.optim.SGD(model_params, lr=params['lr'], momentum=0.8)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=30, gamma=0.85)
 
     tasks = params['tasks']
     all_tasks = configs[params['dataset']]['all_tasks']
@@ -190,6 +191,7 @@ def train_multi_task(params):
                         loss = scale[t]*loss_t
                 loss.backward()
                 optimizer.step()
+            scheduler.step()
 
             writer.add_scalar('training_loss', loss.item(), n_iter)
             for t in tasks:
