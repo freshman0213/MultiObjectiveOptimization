@@ -3,6 +3,11 @@
         "path": "PATH_FOR_MULTIMNIST_DATASET",
         "all_tasks": ["L", "R"]
     },
+    
+    "mnist_film": {
+        "path": "PATH_FOR_MULTIMNIST_DATASET",
+        "all_tasks": ["L", "R"]
+    },
 
     "cityscapes": {
         "path": "PATH_FOR_CITYSCAPES_DATASET",

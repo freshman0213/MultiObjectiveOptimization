@@ -11,7 +11,21 @@ DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 def get_model(params):
     data = params['dataset']
+    if 'mnist_film' in data:
+        print("CALL MultiFilmLeNetR")
+        model = {}
+        model['rep'] = MultiFilmLeNetR()
+        if params['parallel']:
+            model['rep'] = nn.DataParallel(model['rep'])
+        model['rep'].to(DEVICE)
+        model['L'] = MultiLeNetO()
+        if params['parallel']:
+            model['L'] = nn.DataParallel(model['L'])
+        model['L'].to(DEVICE)
+        model['R'] = model['L']
+        return model
     if 'mnist' in data:
+        print("CALL MultiLeNetR")
         model = {}
         model['rep'] = MultiLeNetR()
         if params['parallel']:
@@ -27,18 +41,6 @@ def get_model(params):
             if params['parallel']:
                 model['R'] = nn.DataParallel(model['R'])
             model['R'].to(DEVICE)
-        return model
-    if 'mnist_film' in data:
-        model = {}
-        model['rep'] = MultiFilmLeNetR()
-        if params['parallel']:
-            model['rep'] = nn.DataParallel(model['rep'])
-        model['rep'].to(DEVICE)
-        model['L'] = MultiLeNetO()
-        if params['parallel']:
-            model['L'] = nn.DataParallel(model['L'])
-        model['L'].to(DEVICE)
-        model['R'] = model['L']
         return model
     if 'cityscapes' in data:
         model = {}

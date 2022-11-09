@@ -16,10 +16,13 @@ class FiLM(nn.Module):
     self.betas = torch.tensor(torch.randn(input_shape), requires_grad=True)
 
   def forward(self, x):
-    # gammas = gammas.unsqueeze(2).unsqueeze(3).expand_as(x)
-    # betas = betas.unsqueeze(2).unsqueeze(3).expand_as(x)
-    gammas = self.gammas.unsqueeze(0).unsqueeze(0).expand_as(x)
-    betas = self.betas.unsqueeze(0).unsqueeze(0).expand_as(x)
+    assert x.dim() == 4 or x.dim() == 2
+    if (x.dim() == 4):
+        gammas = self.gammas.unsqueeze(2).unsqueeze(3).expand_as(x)
+        betas = self.betas.unsqueeze(2).unsqueeze(3).expand_as(x)
+    elif (x.dim() == 2):
+        gammas = self.gammas.expand_as(x)
+        betas = self.betas.expand_as(x)
     return (gammas * x) + betas
 
 class MultiFilmLeNetR(nn.Module):
@@ -29,12 +32,12 @@ class MultiFilmLeNetR(nn.Module):
         self.conv2 = nn.Conv2d(10, 20, kernel_size=5)
         self.conv2_drop = nn.Dropout2d(p=params['dropout_rate'])
         self.fc = nn.Linear(320, 50)
-        self.film1_task1 = FiLM(input_shape = (24, 24))
-        self.film1_task2 = FiLM(input_shape = (24, 24))
-        self.film2_task1 = FiLM(input_shape = (8, 8))
-        self.film2_task2 = FiLM(input_shape = (8, 8))
-        self.film3_task1 = FiLM(input_shape = (1))
-        self.film3_task2 = FiLM(input_shape = (1))
+        self.film1_task1 = FiLM(input_shape = (1, 10))
+        self.film1_task2 = FiLM(input_shape = (1, 10))
+        self.film2_task1 = FiLM(input_shape = (1, 20))
+        self.film2_task2 = FiLM(input_shape = (1, 20))
+        self.film3_task1 = FiLM(input_shape = (1, 50))
+        self.film3_task2 = FiLM(input_shape = (1, 50))
 
     def dropout2dwithmask(self, x, mask):
         channel_size = x.shape[1]
@@ -62,8 +65,8 @@ class MultiFilmLeNetR(nn.Module):
         x2 = x2.view(-1, 320)
         x1 = self.fc(x1)
         x2 = self.fc(x2)
-        x1 = self.film2_task1(x1)
-        x2 = self.film2_task2(x2)
+        x1 = self.film3_task1(x1)
+        x2 = self.film3_task2(x2)
         x1 = F.relu(x1)
         x2 = F.relu(x2)
         return x1, x2, mask
