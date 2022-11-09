@@ -27,15 +27,9 @@ from min_norm_solvers import MinNormSolver, gradient_normalizers
 NUM_EPOCHS = 100
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-@click.command()
-@click.option('--param_file', default='params.json', help='JSON parameters file')
-def train_multi_task(param_file):
+def train_multi_task(params):
     with open('configs.json') as config_params:
         configs = json.load(config_params)
-
-    with open(param_file) as json_params:
-        params = json.load(json_params)
-
 
     exp_identifier = []
     for (key, val) in params.items():
@@ -239,7 +233,3 @@ def train_multi_task(param_file):
 
         end = timer()
         print('Epoch ended in {}s'.format(end - start))
-
-
-if __name__ == '__main__':
-    train_multi_task()

@@ -23,11 +23,11 @@ class FiLM(nn.Module):
     return (gammas * x) + betas
 
 class MultiFilmLeNetR(nn.Module):
-    def __init__(self):
+    def __init__(self, params):
         super(MultiFilmLeNetR, self).__init__()
         self.conv1 = nn.Conv2d(1, 10, kernel_size=5)
         self.conv2 = nn.Conv2d(10, 20, kernel_size=5)
-        self.conv2_drop = nn.Dropout2d()
+        self.conv2_drop = nn.Dropout2d(p=params['dropout_rate'])
         self.fc = nn.Linear(320, 50)
         self.film1_task1 = FiLM(input_shape = (24, 24))
         self.film1_task2 = FiLM(input_shape = (24, 24))
@@ -70,11 +70,11 @@ class MultiFilmLeNetR(nn.Module):
 
 
 class MultiLeNetR(nn.Module):
-    def __init__(self):
+    def __init__(self, params):
         super(MultiLeNetR, self).__init__()
         self.conv1 = nn.Conv2d(1, 10, kernel_size=5)
         self.conv2 = nn.Conv2d(10, 20, kernel_size=5)
-        self.conv2_drop = nn.Dropout2d()
+        self.conv2_drop = nn.Dropout2d(p=params['dropout_rate'])
         self.fc = nn.Linear(320, 50)
 
     def dropout2dwithmask(self, x, mask):
