@@ -63,22 +63,11 @@ def train_multi_task(params):
     all_tasks = configs[params['dataset']]['all_tasks']
     print('Starting training with parameters \n \t{} \n'.format(str(params)))
 
-    if 'mgda' in params['algorithm']:
-        approximate_norm_solution = params['use_approximation']
-        if approximate_norm_solution:
-            print('Using approximate min-norm solver')
-        else:
-            print('Using full solver')
     n_iter = 0
     loss_init = {}
     for epoch in tqdm(range(NUM_EPOCHS)):
         start = timer()
         print('Epoch {} Started'.format(epoch))
-        if (epoch+1) % 10 == 0:
-            # Every 50 epoch, half the LR
-            for param_group in optimizer.param_groups:
-                param_group['lr'] *= 0.85
-            print('Half the learning rate{}'.format(n_iter))
 
         for m in model:
             model[m].train()
@@ -99,78 +88,17 @@ def train_multi_task(params):
 
             # Scaling the loss functions based on the algorithm choice
             loss_data = {}
-            grads = {}
             scale = {}
-            mask = None
-            masks = {}
-            if 'mgda' in params['algorithm']:
-                # Will use our MGDA_UB if approximate_norm_solution is True. Otherwise, will use MGDA
 
-                if approximate_norm_solution:
-                    optimizer.zero_grad()
-                    # First compute representations (z)
-                    images_volatile = Variable(images.data, volatile=True)
-                    rep, mask = model['rep'](images_volatile, mask)
-                    # As an approximate solution we only need gradients for input
-                    if isinstance(rep, list):
-                        # This is a hack to handle psp-net
-                        rep = rep[0]
-                        rep_variable = [Variable(rep.data.clone(), requires_grad=True)]
-                        list_rep = True
-                    else:
-                        rep_variable = Variable(rep.data.clone(), requires_grad=True)
-                        list_rep = False
-
-                    # Compute gradients of each loss function wrt z
-                    for t in tasks:
-                        optimizer.zero_grad()
-                        out_t, masks[t] = model[t](rep_variable, None)
-                        loss = loss_fn[t](out_t, labels[t])
-                        loss_data[t] = loss.item() #.data #[0]
-                        loss.backward()
-                        grads[t] = []
-                        if list_rep:
-                            grads[t].append(Variable(rep_variable[0].grad.data.clone(), requires_grad=False))
-                            rep_variable[0].grad.data.zero_()
-                        else:
-                            grads[t].append(Variable(rep_variable.grad.data.clone(), requires_grad=False))
-                            rep_variable.grad.data.zero_()
-                else:
-                    # This is MGDA
-                    for t in tasks:
-                        # Comptue gradients of each loss function wrt parameters
-                        optimizer.zero_grad()
-                        rep, mask = model['rep'](images, mask)
-                        out_t, masks[t] = model[t](rep, None)
-                        loss = loss_fn[t](out_t, labels[t])
-                        loss_data[t] = loss.item()
-                        loss.backward()
-                        grads[t] = []
-                        for param in model['rep'].parameters():
-                            if param.grad is not None:
-                                grads[t].append(Variable(param.grad.data.clone(), requires_grad=False))
-
-                # Normalize all gradients, this is optional and not included in the paper.
-                gn = gradient_normalizers(grads, loss_data, params['normalization_type'])
-                for t in tasks:
-                    for gr_i in range(len(grads[t])):
-                        grads[t][gr_i] = grads[t][gr_i] / gn[t]
-
-                # Frank-Wolfe iteration to compute scales.
-                sol, min_norm = MinNormSolver.find_min_norm_element([grads[t] for t in tasks])
-                for i, t in enumerate(tasks):
-                    scale[t] = float(sol[i])
-            else:
-                for t in tasks:
-                    masks[t] = None
-                    scale[t] = float(params['scales'][t])
+            for t in tasks:
+                scale[t] = float(params['scales'][t])
 
             # Scaled back-propagation
             optimizer.zero_grad()
-            out = model['rep'](images, mask)
-            if len(out) == 3: 
+            rep = model['rep'](images)
+            if len(rep) == 2: 
                 for i, t in enumerate(tasks):
-                    out_t, _ = model[t](out[i], masks[t])
+                    out_t = model[t](rep[i])
                     loss_t = loss_fn[t](out_t, labels[t])
                     loss_data[t] = loss_t.item() 
                     if i > 0:
@@ -179,10 +107,9 @@ def train_multi_task(params):
                         loss = scale[t]*loss_t
                 loss.backward()
                 optimizer.step()
-            else: 
-                rep = out[0]
+            else:
                 for i, t in enumerate(tasks):
-                    out_t, _ = model[t](rep, masks[t])
+                    out_t = model[t](rep)
                     loss_t = loss_fn[t](out_t, labels[t])
                     loss_data[t] = loss_t.item() 
                     if i > 0:
@@ -218,19 +145,17 @@ def train_multi_task(params):
                     labels_val[t] = batch_val[i+1]
                     labels_val[t] = labels_val[t].to(DEVICE)
 
-                val_rep = model['rep'](val_images, None)
-                if len(val_rep) == 3:
-                    val_rep = val_rep[0:2]
+                val_rep = model['rep'](val_images)
+                if len(val_rep) == 2:
                     for i, t in enumerate(tasks):
-                        out_t_val, _ = model[t](val_rep[i], None)
+                        out_t_val = model[t](val_rep[i])
                         loss_t = loss_fn[t](out_t_val, labels_val[t])
                         tot_loss['all'] += loss_t.item()
                         tot_loss[t] += loss_t.item()
                         metric[t].update(out_t_val, labels_val[t])
                 else:
-                    val_rep = val_rep[0]
                     for t in tasks:
-                        out_t_val, _ = model[t](val_rep, None)
+                        out_t_val = model[t](val_rep)
                         loss_t = loss_fn[t](out_t_val, labels_val[t])
                         tot_loss['all'] += loss_t.item()
                         tot_loss[t] += loss_t.item()
