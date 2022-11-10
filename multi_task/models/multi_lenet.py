@@ -87,7 +87,7 @@ class MultiLeNetO(nn.Module):
     def __init__(self, params):
         super(MultiLeNetO, self).__init__()
         self.fc1 = nn.Linear(50, 50)
-        self.fc1_drop = nn.Dropout2d(p=params['dropout_rate'])
+        self.fc1_drop = nn.Dropout1d(p=params['dropout_rate'])
         self.fc2 = nn.Linear(50, 10)
     
     def forward(self, x):

@@ -1,3 +1,5 @@
+import os
+import errno
 import sys
 import torch
 import click
@@ -24,7 +26,7 @@ import metrics
 import model_selector
 from min_norm_solvers import MinNormSolver, gradient_normalizers
 
-NUM_EPOCHS = 100
+NUM_EPOCHS = 2
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 def train_multi_task(params):
@@ -143,12 +145,12 @@ def train_multi_task(params):
                     for i, t in enumerate(tasks):
                         out_t_val = model[t](val_rep[i])
                         loss_t = loss_fn[t](out_t_val, labels_val[t])
-                        tot_loss += scale[t]*loss_t.item()
+                        tot_val_loss += scale[t]*loss_t.item()
                 else:
                     for t in tasks:
                         out_t_val = model[t](val_rep)
                         loss_t = loss_fn[t](out_t_val, labels_val[t])
-                        tot_loss += scale[t]*loss_t.item()
+                        tot_val_loss += scale[t]*loss_t.item()
                 num_val_batches+=1
         writer.add_scalar('validation_loss', tot_val_loss/len(val_dst), n_iter)
 
@@ -184,14 +186,14 @@ def train_multi_task(params):
                         for i, t in enumerate(tasks):
                             out_t_test = model[t](test_rep[i])
                             loss_t = loss_fn[t](out_t_test, labels_test[t])
-                            tot_loss['all'] += scale[i]*loss_t.item()
+                            tot_loss['all'] += scale[t]*loss_t.item()
                             tot_loss[t] += loss_t.item()
                             metric[t].update(out_t_test, labels_test[t])
                     else:
                         for t in tasks:
                             out_t_test = model[t](test_rep)
                             loss_t = loss_fn[t](out_t_test, labels_test[t])
-                            tot_loss['all'] += scale[i]*loss_t.item()
+                            tot_loss['all'] += scale[t]*loss_t.item()
                             tot_loss[t] += loss_t.item()
                             metric[t].update(out_t_test, labels_test[t])
                     num_test_batches+=1
@@ -204,6 +206,13 @@ def train_multi_task(params):
                     metric[t].reset()
                 state['testing_loss'] = tot_loss['all']/len(test_dst) 
 
+            try:
+                os.makedirs(os.path.join('./saved_models'))
+            except OSError as e:
+                if e.errno == errno.EEXIST:
+                    pass
+                else:
+                    raise
             torch.save(state, "./saved_models/{}_model.pkl".format(params['exp_id']))
 
         end = timer()

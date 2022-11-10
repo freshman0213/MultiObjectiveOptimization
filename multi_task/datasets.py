@@ -19,13 +19,13 @@ def get_dataset(params, configs):
         print('ERROR: No dataset is specified')
 
     if 'mnist' in params['dataset'] or 'mnist_film' in params['dataset']:
-        train_dst = MNIST(root=configs['mnist']['path'], split='train', download=True, transform=global_transformer(), multi=True)
+        train_dst = MNIST(root=configs['mnist']['path'], split='train', download=True, transform=global_transformer())
         train_loader = torch.utils.data.DataLoader(train_dst, batch_size=params['batch_size'], shuffle=True, num_workers=4)
 
-        val_dst = MNIST(root=configs['mnist']['path'], split='val', download=True, transform=global_transformer(), multi=True)
+        val_dst = MNIST(root=configs['mnist']['path'], split='val', download=True, transform=global_transformer())
         val_loader = torch.utils.data.DataLoader(val_dst, batch_size=100, shuffle=False, num_workers=4)
 
-        test_dst = MNIST(root=configs['mnist']['path'], split='test', download=True, transform=global_transformer(), multi=True)
+        test_dst = MNIST(root=configs['mnist']['path'], split='test', download=True, transform=global_transformer())
         test_loader = torch.utils.data.DataLoader(test_dst, batch_size=100, shuffle=False, num_workers=4)
         return train_loader, train_dst, val_loader, val_dst, test_loader, test_dst
 
