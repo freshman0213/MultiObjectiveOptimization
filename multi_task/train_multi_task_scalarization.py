@@ -33,7 +33,11 @@ def train_multi_task_scalarization(param_file):
         for (key, val) in trial_params.items():
             if 'tasks' in key:
                 continue
-            trial_identifier+= ['{}={}'.format(key,val)]
+            if 'scales' in key:
+                for task, scale in val.items():
+                    trial_identifier += ['scale_{}={}'.format(task, scale)]
+            else:
+                trial_identifier += ['{}={}'.format(key,val)]
         trial_identifier = '|'.join(trial_identifier)
         
         # Trian the multi-task model with specific params
@@ -66,7 +70,11 @@ def train_multi_task_scalarization(param_file):
     for (key, val) in params.items():
         if 'tasks' in key or 'hyper_parameters' in key:
             continue
-        exp_identifier+= ['{}={}'.format(key,val)]
+        if 'scales' in key:
+            for task, scale in val.items():
+                exp_identifier += ['scale_{}={}'.format(task, scale)]
+        else:
+            exp_identifier += ['{}={}'.format(key,val)]
     exp_identifier = '|'.join(exp_identifier)
     np.save(exp_identifier, pareto_frontier)
 

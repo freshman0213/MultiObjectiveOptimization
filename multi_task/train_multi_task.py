@@ -26,7 +26,7 @@ import metrics
 import model_selector
 from min_norm_solvers import MinNormSolver, gradient_normalizers
 
-NUM_EPOCHS = 2
+NUM_EPOCHS = 100
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 def train_multi_task(params):
@@ -37,7 +37,11 @@ def train_multi_task(params):
     for (key, val) in params.items():
         if 'tasks' in key:
             continue
-        exp_identifier+= ['{}={}'.format(key,val)]
+        if 'scales' in key:
+            for task, scale in val.items():
+                exp_identifier += ['scale_{}={}'.format(task, scale)]
+        else:
+            exp_identifier += ['{}={}'.format(key,val)]
 
     exp_identifier = '|'.join(exp_identifier)
     params['exp_id'] = exp_identifier
