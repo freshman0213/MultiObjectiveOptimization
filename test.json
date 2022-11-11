@@ -6,6 +6,6 @@
     "batch_size": 256,
     "dataset": "mnist",
     "tasks": ["L", "R"],
-    "scales": {"L":0.5, "R":0.5},
+    "scales": {"L":0.3, "R":0.7},
     "parallel": true
 }

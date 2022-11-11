@@ -207,7 +207,7 @@ def train_multi_task(params):
                     metric_results = metric[t].get_result()
                     for metric_key in metric_results:
                         state['metric_{}_{}'.format(metric_key, t)] = metric_results[metric_key]
-                        # writer.add_scalar('metric_{}_{}'.format(metric_key, t), metric_results[metric_key], n_iter) 
+                        writer.add_scalar('metric_{}_{}'.format(metric_key, t), metric_results[metric_key], n_iter) 
                     metric[t].reset()
                 state['testing_loss'] = tot_loss['all']/len(test_dst) 
 
