@@ -12,8 +12,8 @@ class FiLM(nn.Module):
   """
   def __init__(self, input_shape): 
     super(FiLM, self).__init__()
-    self.gammas = torch.tensor(torch.randn(input_shape), requires_grad=True)
-    self.betas = torch.tensor(torch.randn(input_shape), requires_grad=True)
+    self.gammas = nn.parameter.Parameter(torch.randn(input_shape))
+    self.betas = nn.parameter.Parameter(torch.randn(input_shape))
 
   def forward(self, x):
     assert x.dim() == 4 or x.dim() == 2
