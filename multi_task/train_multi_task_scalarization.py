@@ -1,3 +1,4 @@
+import os
 import click
 import json
 import torch
@@ -39,13 +40,14 @@ def train_multi_task_scalarization(param_file):
             else:
                 trial_identifier += ['{}={}'.format(key,val)]
         trial_identifier = '|'.join(trial_identifier)
-        
-        # Trian the multi-task model with specific params
-        train_multi_task(trial_params)
+        if not os.path.exists("./saved_models/{}_model.pkl".format(trial_identifier)):
+            # Trian the multi-task model with specific params
+            train_multi_task(trial_params)
 
         # Retrieve the best model's performance
+        if not os.path.exists("./saved_models/{}_model.pkl".format(trial_identifier)):
+            continue
         tasks = fixed_params['tasks']
-
         state = torch.load("./saved_models/{}_model.pkl".format(trial_identifier))
         testing_loss = {}
         for t in tasks:
