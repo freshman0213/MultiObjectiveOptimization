@@ -65,18 +65,18 @@ def train_multi_task_scalarization(param_file):
                     pareto_frontier.remove(x)
             pareto_frontier.append(testing_loss)
 
-    # Save the pareto frontier
-    exp_identifier = []
-    for (key, val) in params.items():
-        if 'tasks' in key or 'hyper_parameters' in key:
-            continue
-        if 'scales' in key:
-            for task, scale in val.items():
-                exp_identifier += ['scale_{}={}'.format(task, scale)]
-        else:
-            exp_identifier += ['{}={}'.format(key,val)]
-    exp_identifier = '|'.join(exp_identifier)
-    np.save(exp_identifier, pareto_frontier)
+    # # Save the pareto frontier
+    # exp_identifier = []
+    # for (key, val) in params.items():
+    #     if 'tasks' in key or 'hyper_parameters' in key:
+    #         continue
+    #     if 'scales' in key:
+    #         for task, scale in val.items():
+    #             exp_identifier += ['scale_{}={}'.format(task, scale)]
+    #     else:
+    #         exp_identifier += ['{}={}'.format(key,val)]
+    # exp_identifier = '|'.join(exp_identifier)
+    # np.save(exp_identifier, pareto_frontier)
 
 def pareto_dominate(a, b):
     for k in a.keys():
