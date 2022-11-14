@@ -12,8 +12,8 @@ class FiLM(nn.Module):
   """
   def __init__(self, input_shape): 
     super(FiLM, self).__init__()
-    self.gammas = torch.tensor(torch.randn(input_shape), requires_grad=True)
-    self.betas = torch.tensor(torch.randn(input_shape), requires_grad=True)
+    self.gammas = nn.parameter.Parameter(torch.randn(input_shape))
+    self.betas = nn.parameter.Parameter(torch.randn(input_shape))
 
   def forward(self, x):
     assert x.dim() == 4 or x.dim() == 2
@@ -97,3 +97,16 @@ class MultiLeNetO(nn.Module):
         x = F.relu(x)
         x = self.fc2(x)
         return F.log_softmax(x, dim=1)
+
+
+if __name__ == '__main__':
+    params = {'dropout_rate': 0}
+
+    model = MultiFilmLeNetR(params)
+    print("MultiFilmLeNetR: ", sum(p.numel() for p in model.parameters()))
+
+    model = MultiLeNetR(params)
+    print("MultiLeNetR: ", sum(p.numel() for p in model.parameters()))
+
+    model = MultiLeNetO(params)
+    print("MultiLeNetO: ", sum(p.numel() for p in model.parameters()))
