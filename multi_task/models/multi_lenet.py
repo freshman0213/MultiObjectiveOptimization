@@ -5,6 +5,11 @@ from torch.autograd import Variable
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
+def initialize_weights(model):
+    if type(model) in [nn.Linear, nn.Conv2d]:
+        nn.init.xavier_uniform_(model.weight)
+        nn.init.zeros_(model.bias)
+
 class FiLM(nn.Module):
   """
   A Feature-wise Linear Modulation Layer from
@@ -73,6 +78,10 @@ class MultiLeNetR(nn.Module):
         self.conv2_drop = nn.Dropout2d(p=params['dropout_rate'])
         self.fc = nn.Linear(320, 50)
 
+        initialize_weights(self.conv1)
+        initialize_weights(self.conv2)
+        initialize_weights(self.fc)
+
     def forward(self, x):
         x = F.relu(F.max_pool2d(self.conv1(x), 2))
         x = self.conv2(x)
@@ -89,6 +98,10 @@ class MultiLeNetO(nn.Module):
         self.fc1 = nn.Linear(50, 50)
         self.fc1_drop = nn.Dropout1d(p=params['dropout_rate'])
         self.fc2 = nn.Linear(50, 10)
+
+        initialize_weights(self.fc1)
+        initialize_weights(self.fc2)
+
     
     def forward(self, x):
         x = self.fc1(x)
