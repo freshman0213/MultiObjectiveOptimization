@@ -122,11 +122,11 @@ def train_multi_task(params):
                         loss = scale[t]*loss_t
                 loss.backward()
                 optimizer.step()
-            scheduler.step()
-
             writer.add_scalar('training_loss', loss.item(), n_iter)
             for t in tasks:
                 writer.add_scalar('training_loss_{}'.format(t), loss_data[t], n_iter)
+
+        scheduler.step()
 
         for m in model:
             model[m].eval()
