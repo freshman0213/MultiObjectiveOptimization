@@ -7,6 +7,8 @@ from train_multi_task import train_multi_task
 
 @click.command()
 @click.option('--param_file', default='params.json', help='JSON parameters file')
+
+RESULT_FOLDER = './results/mnist/'
 def train_multi_task_scalarization(param_file):
     with open(param_file) as json_params:
         params = json.load(json_params)
@@ -78,6 +80,7 @@ def train_multi_task_scalarization(param_file):
         else:
             exp_identifier += ['{}={}'.format(key,val)]
     exp_identifier = '|'.join(exp_identifier)
+    exp_identifier = RESULT_FOLDER+exp_identifier
     np.save(exp_identifier, pareto_frontier)
 
 def pareto_dominate(a, b):
