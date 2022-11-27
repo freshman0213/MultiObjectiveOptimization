@@ -1,5 +1,5 @@
-mkdir CelebA
-cd CelebA
+mkdir PATH_FOR_CELEBA_DATASET
+cd PATH_FOR_CELEBA_DATASET
 mkdir Img 
 cd Img
 cd ..
