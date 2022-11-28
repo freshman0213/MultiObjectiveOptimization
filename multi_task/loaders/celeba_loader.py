@@ -2,6 +2,8 @@ import os
 import torch
 import numpy as np
 import scipy.misc as m
+import imageio
+from PIL import Image
 import re
 import glob
 
@@ -76,7 +78,7 @@ class CELEBA(data.Dataset):
         """
         img_path = self.files[self.split][index].rstrip()
         label = self.labels[self.split][index]
-        img = m.imread(img_path)
+        img = imageio.imread(img_path)
 
         if self.augmentations is not None:
             img = self.augmentations(np.array(img, dtype=np.uint8))
@@ -93,7 +95,7 @@ class CELEBA(data.Dataset):
         img = img[:, :, ::-1]
         img = img.astype(np.float64)
         img -= self.mean
-        img = m.imresize(img, (self.img_size[0], self.img_size[1]))
+        img = np.array(Image.fromarray((img * 255).astype(np.uint8)).resize((self.img_size[0], self.img_size[1])).convert('RGB'))
         # Resize scales images from 0 to 255, thus we need
         # to divide by 255.0
         img = img.astype(float) / 255.0
