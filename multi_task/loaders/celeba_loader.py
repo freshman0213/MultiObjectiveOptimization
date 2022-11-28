@@ -58,7 +58,7 @@ class CELEBA(data.Dataset):
                                 'Male', 'Mouth_Slightly_Open', 'Mustache', 'Narrow_Eyes', 'No_Beard', 'Oval_Face', 'Pale_Skin', 
                                 'Pointy_Nose', 'Receding_Hairline', 'Rosy_Cheeks', 'Sideburns', 'Smiling', 'Straight_Hair', 'Wavy_Hair', 
                                 'Wearing_Earrings', 'Wearing_Hat', 'Wearing_Lipstick', 'Wearing_Necklace', 'Wearing_Necktie', 'Young']
-        self.class_names = self.class_nams[:self.n_classes]
+        self.class_names = self.class_names[:self.n_classes]
 
         if len(self.files[self.split]) < 2:
             raise Exception("No files for split=[%s] found in %s" % (self.split, self.root))
