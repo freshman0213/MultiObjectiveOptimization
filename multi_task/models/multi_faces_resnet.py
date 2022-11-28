@@ -116,7 +116,7 @@ class BasicBlockFilm(nn.Module):
         self.bn1 = nn.BatchNorm2d(planes)
         self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=1, padding=1, bias=False)
         self.bn2 = nn.BatchNorm2d(planes)
-        self.films = [FiLM(input_shape = (1, self.expansion*planes)) for i in range(num_tasks)]
+        self.films = nn.ModuleList([FiLM(input_shape = (1, self.expansion*planes)) for _ in range(num_tasks)])
         self.shortcut = nn.Sequential()
         if stride != 1 or in_planes != self.expansion*planes:
             self.shortcut = nn.Sequential(
@@ -134,7 +134,7 @@ class BasicBlockFilm(nn.Module):
 class ResNetTaskLayer(nn.Module):
     def __init__(self, layers):
         super(ResNetTaskLayer, self).__init__()
-        self.layers = layers
+        self.layers = nn.ModuleList(layers)
     def forward(self, x, task):
         for l in self.layers: 
             x = l(x, task)
