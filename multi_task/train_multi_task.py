@@ -66,7 +66,7 @@ def train_multi_task(params):
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=30, gamma=0.85)
 
     tasks = params['tasks']
-    all_tasks = configs[params['dataset']]['all_tasks']
+    all_tasks = params['tasks']
     print('Starting training with parameters \n \t{} \n'.format(str(params)))
 
     scale = {}

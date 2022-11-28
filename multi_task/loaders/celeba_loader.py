@@ -9,7 +9,7 @@ from torch.utils import data
 
 
 class CELEBA(data.Dataset):
-    def __init__(self, root, split="train", is_transform=False, img_size=(32, 32), augmentations=None):
+    def __init__(self, params, root, split="train", is_transform=False, img_size=(32, 32), augmentations=None):
         """__init__
 
         :param root:
@@ -22,7 +22,7 @@ class CELEBA(data.Dataset):
         self.split = split
         self.is_transform = is_transform
         self.augmentations = augmentations
-        self.n_classes =  40
+        self.n_classes =  len(params['tasks'])
         self.img_size = img_size if isinstance(img_size, tuple) else (img_size, img_size)
         self.mean = np.array([73.15835921, 82.90891754, 72.39239876]) # TODO(compute this mean)
         self.files = {}
@@ -34,7 +34,7 @@ class CELEBA(data.Dataset):
             labels = l_file.read().split('\n')[2:-1]
         for label_line in labels:
             f_name = re.sub('jpg', 'png', label_line.split(' ')[0])
-            label_txt = list(map(lambda x:int(x), re.sub('-1','0',label_line).split()[1:]))
+            label_txt = list(map(lambda x:int(x), re.sub('-1','0',label_line).split()[1:self.n_classes+1]))
             label_map[f_name]=label_txt
 
         self.all_files = glob.glob(self.root+'/Img/img_align_celeba_png/*.png')
@@ -58,6 +58,7 @@ class CELEBA(data.Dataset):
                                 'Male', 'Mouth_Slightly_Open', 'Mustache', 'Narrow_Eyes', 'No_Beard', 'Oval_Face', 'Pale_Skin', 
                                 'Pointy_Nose', 'Receding_Hairline', 'Rosy_Cheeks', 'Sideburns', 'Smiling', 'Straight_Hair', 'Wavy_Hair', 
                                 'Wearing_Earrings', 'Wearing_Hat', 'Wearing_Lipstick', 'Wearing_Necklace', 'Wearing_Necktie', 'Young']
+        self.class_names = self.class_nams[:self.n_classes]
 
         if len(self.files[self.split]) < 2:
             raise Exception("No files for split=[%s] found in %s" % (self.split, self.root))
