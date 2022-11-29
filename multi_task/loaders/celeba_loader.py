@@ -39,14 +39,20 @@ class CELEBA(data.Dataset):
             label_txt = list(map(lambda x:int(x), re.sub('-1','0',label_line).split()[1:self.n_classes+1]))
             label_map[f_name]=label_txt
 
+        self.subset = set()
+        with open(self.root+'/subset.txt') as f:
+            lines = f.readlines()
+            for line in lines:
+                self.subset.add(line.rstrip('\n'))
+
         self.all_files = glob.glob(self.root+'/Img/img_align_celeba_png/*.png')
         with open(root+'//Eval/list_eval_partition.txt', 'r') as f:
             fl = f.read().split('\n')
             fl.pop()
             if 'train' in self.split:
-                selected_files = list(filter(lambda x:x.split(' ')[1]=='0', fl))
+                selected_files = list(filter(lambda x:x.split(' ')[0] in self.subset and x.split(' ')[1]=='0', fl))
             elif 'val' in self.split:
-                selected_files =  list(filter(lambda x:x.split(' ')[1]=='1', fl))
+                selected_files =  list(filter(lambda x:x.split(' ')[0] in self.subset and x.split(' ')[1]=='1', fl))
             elif 'test' in self.split:
                 selected_files =  list(filter(lambda x:x.split(' ')[1]=='2', fl))
             selected_file_names = list(map(lambda x:re.sub('jpg', 'png', x.split(' ')[0]), selected_files))
