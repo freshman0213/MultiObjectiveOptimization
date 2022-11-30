@@ -9,7 +9,7 @@ from train_multi_task import train_multi_task, test_multi_task
 @click.option('--param_file', default='params.json', help='JSON parameters file')
 
 def train_multi_task_scalarization(param_file):
-    RESULT_FOLDER = './results/mnist/'
+    RESULT_FOLDER = './results/celeba/'
     with open(param_file) as json_params:
         params = json.load(json_params)
 

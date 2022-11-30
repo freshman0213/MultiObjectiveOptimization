@@ -171,13 +171,13 @@ def train_multi_task(params):
             
 
             try:
-                os.makedirs(os.path.join('./saved_models/test/'))
+                os.makedirs(os.path.join('./saved_models/'))
             except OSError as e:
                 if e.errno == errno.EEXIST:
                     pass
                 else:
                     raise
-            torch.save(state, "./saved_models/test/{}_model.pkl".format(params['exp_id']))
+            torch.save(state, "./saved_models/{}_model.pkl".format(params['exp_id']))
         
         end = timer()
         print('Epoch ended in {}s'.format(end - start))
@@ -191,7 +191,7 @@ def test_multi_task(params, trial_identifier):
     loss_fn = losses.get_loss(params)
     metric = metrics.get_metrics(params)
 
-    state = torch.load("./saved_models/test/{}_model.pkl".format(trial_identifier))
+    state = torch.load("./saved_models/{}_model.pkl".format(trial_identifier))
 
     model = model_selector.get_model(params)
     model['rep'].load_state_dict(state['model_rep'])
