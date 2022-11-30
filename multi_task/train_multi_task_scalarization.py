@@ -3,7 +3,7 @@ import click
 import json
 import torch
 import numpy as np
-from train_multi_task import train_multi_task
+from train_multi_task import train_multi_task, test_multi_task
 
 @click.command()
 @click.option('--param_file', default='params.json', help='JSON parameters file')
@@ -50,11 +50,7 @@ def train_multi_task_scalarization(param_file):
         if not os.path.exists("./saved_models/{}_model.pkl".format(trial_identifier)):
             continue
         tasks = fixed_params['tasks']
-        state = torch.load("./saved_models/{}_model.pkl".format(trial_identifier))
-        testing_loss = {}
-        for t in tasks:
-            testing_loss[t] = state['testing_loss_{}'.format(t)]
-
+        testing_loss, testing_metric = test_multi_task(trial_params, trial_identifier)
         # Check whether it is on the Pareto Frontier
         non_dominated = True
         for x in pareto_frontier:
@@ -68,7 +64,7 @@ def train_multi_task_scalarization(param_file):
                 if pareto_dominate(testing_loss, x):
                     pareto_frontier.remove(x)
             pareto_frontier.append(testing_loss)
-
+            
     # Save the pareto frontier
     exp_identifier = []
     for (key, val) in params.items():

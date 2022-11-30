@@ -168,57 +168,93 @@ def train_multi_task(params):
                 key_name = 'model_{}'.format(t)
                 state[key_name] = model[t].state_dict()
 
-            ##### Testing #####
-            tot_loss = {}
-            tot_loss['all'] = 0.0
-            for t in tasks:
-                tot_loss[t] = 0.0
-
-            num_test_batches = 0
-            with torch.no_grad():
-                for batch_test in test_loader:
-                    test_images = batch_test[0].to(DEVICE)
-                    labels_test = {}
-                    for i, t in enumerate(all_tasks):
-                        if t not in tasks:
-                            continue
-                        labels_test[t] = batch_test[i+1]
-                        labels_test[t] = labels_test[t].to(DEVICE)
-
-                    test_rep = model['rep'](test_images)
-                    if len(test_rep) == 2:
-                        for i, t in enumerate(tasks):
-                            out_t_test = model[t](test_rep[i])
-                            loss_t = loss_fn[t](out_t_test, labels_test[t])
-                            tot_loss['all'] += scale[t]*loss_t.item()
-                            tot_loss[t] += loss_t.item()
-                            metric[t].update(out_t_test, labels_test[t])
-                    else:
-                        for t in tasks:
-                            out_t_test = model[t](test_rep)
-                            loss_t = loss_fn[t](out_t_test, labels_test[t])
-                            tot_loss['all'] += scale[t]*loss_t.item()
-                            tot_loss[t] += loss_t.item()
-                            metric[t].update(out_t_test, labels_test[t])
-                    num_test_batches+=1
-                
-                for t in tasks:
-                    state['testing_loss_{}'.format(t)] = tot_loss[t]/num_test_batches 
-                    metric_results = metric[t].get_result()
-                    for metric_key in metric_results:
-                        state['metric_{}_{}'.format(metric_key, t)] = metric_results[metric_key] 
-                        # writer.add_scalar('metric_{}_{}'.format(metric_key, t), metric_results[metric_key], n_iter) 
-                    metric[t].reset()
-                state['testing_loss'] = tot_loss['all']/len(test_dst) 
+            
 
             try:
-                os.makedirs(os.path.join('./saved_models'))
+                os.makedirs(os.path.join('./saved_models/test/'))
             except OSError as e:
                 if e.errno == errno.EEXIST:
                     pass
                 else:
                     raise
-            torch.save(state, "./saved_models/{}_model.pkl".format(params['exp_id']))
-
+            torch.save(state, "./saved_models/test/{}_model.pkl".format(params['exp_id']))
+        
         end = timer()
         print('Epoch ended in {}s'.format(end - start))
+
+
+def test_multi_task(params, trial_identifier):
+    with open('configs.json') as config_params:
+        configs = json.load(config_params)
+    _, _, _, _, test_loader, test_dst = datasets.get_dataset(params, configs)
+
+    loss_fn = losses.get_loss(params)
+    metric = metrics.get_metrics(params)
+
+    state = torch.load("./saved_models/test/{}_model.pkl".format(trial_identifier))
+
+    model = model_selector.get_model(params)
+    model['rep'].load_state_dict(state['model_rep'])
+
+    tasks = params['tasks']
+    all_tasks = params['tasks']
+
+    scale = {}
+    for t in tasks:
+        scale[t] = float(params['scales'][t])
+
+    for t in tasks:
+        key_name = 'model_{}'.format(t)
+        model[t].load_state_dict(state[key_name])
+
+    # ##### Testing #####
+    tot_loss = {}
+    tot_loss['all'] = 0.0
+    for t in tasks:
+        tot_loss[t] = 0.0
+
+    num_test_batches = 0 
+    
+    testing_metric = {}
+    testing_loss = {}
+
+    for m in model:
+        model[m].eval()
+
+    with torch.no_grad():
+        for batch_test in test_loader:
+            test_images = batch_test[0].to(DEVICE)
+            labels_test = {}
+            for i, t in enumerate(all_tasks):
+                if t not in tasks:
+                    continue
+                labels_test[t] = batch_test[i+1]
+                labels_test[t] = labels_test[t].to(DEVICE)
+
+            test_rep = model['rep'](test_images)
+            if len(test_rep) == 2:
+                for i, t in enumerate(tasks):
+                    out_t_test = model[t](test_rep[i])
+                    loss_t = loss_fn[t](out_t_test, labels_test[t])
+                    tot_loss['all'] += scale[t]*loss_t.item()
+                    tot_loss[t] += loss_t.item()
+                    metric[t].update(out_t_test, labels_test[t])
+            else:
+                for t in tasks:
+                    out_t_test = model[t](test_rep)
+                    loss_t = loss_fn[t](out_t_test, labels_test[t])
+                    tot_loss['all'] += scale[t]*loss_t.item()
+                    tot_loss[t] += loss_t.item()
+                    metric[t].update(out_t_test, labels_test[t])
+            num_test_batches+=1
+        
+        for t in tasks:
+            testing_loss[t] = tot_loss[t]/num_test_batches
+            metric_results = metric[t].get_result()
+            for metric_key in metric_results:
+                testing_metric[t] = metric_results[metric_key].item() 
+                # writer.add_scalar('metric_{}_{}'.format(metric_key, t), metric_results[metric_key], n_iter) 
+            metric[t].reset()
+        testing_loss['all'] = tot_loss['all']/len(test_dst)
+
+        return testing_loss, testing_metric
