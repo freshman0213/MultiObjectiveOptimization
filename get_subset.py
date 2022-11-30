@@ -1,5 +1,5 @@
 subset_images = []
-subset_identities = set([i+1 for i in range(1000)])
+subset_identities = set([i+1 for i in range(800)])
 with open('PATH_FOR_CELEBA_DATASET/Anno/identity_CelebA.txt') as f:
     lines = f.readlines()
     for line in lines:

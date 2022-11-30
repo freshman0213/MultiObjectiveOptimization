@@ -36,7 +36,7 @@ class CELEBA(data.Dataset):
             labels = l_file.read().split('\n')[2:-1]
         for label_line in labels:
             f_name = re.sub('jpg', 'png', label_line.split(' ')[0])
-            label_txt = list(map(lambda x:int(x), re.sub('-1','0',label_line).split()[1:self.n_classes+1]))
+            label_txt = list(map(lambda x:int(x), re.sub('-1','0',label_line).split()[1:self.n_classes+1])) # TODO: get right label
             label_map[f_name]=label_txt
 
         self.subset = set()
