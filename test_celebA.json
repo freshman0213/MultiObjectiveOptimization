@@ -5,8 +5,8 @@
     "optimizer": "SGD", 
     "batch_size": 128,
     "dataset": "celeba_film",
-    "tasks": ["0", "1"],
-    "scales": {"0":0.5, "1":0.5},
+    "tasks": ["2", "36"],
+    "scales": {"2":0.5, "36":0.5},
     "parallel": true
 }
 
