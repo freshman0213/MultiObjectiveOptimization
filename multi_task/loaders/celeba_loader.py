@@ -60,10 +60,10 @@ class CELEBA(data.Dataset):
         base_path = '/'.join(self.all_files[0].split('/')[:-1])
         self.files[self.split] = list(map(lambda x: '/'.join([base_path, x]), set(map(lambda x:x.split('/')[-1], self.all_files)).intersection(set(selected_file_names))))
         self.images = []
-        for img_path in self.files:
+        for img_path in self.files[self.split]:
             img = imageio.imread(img_path.rstrip())
-            self.images.append(img)
-        self.images = np.vstack(self.images).reshape(-1, 218, 178, 3)
+            self.images.append(self.transform_img(img))
+        self.images = torch.stack(self.images)
         self.labels[self.split] = list(map(lambda x: label_map[x], set(map(lambda x:x.split('/')[-1], self.all_files)).intersection(set(selected_file_names))))
         self.class_names = ['5_o_Clock_Shadow', 'Arched_Eyebrows', 'Attractive', 'Bags_Under_Eyes', 'Bald', 'Bangs',
                                 'Big_Lips', 'Big_Nose', 'Black_Hair', 'Blond_Hair', 'Blurry', 'Brown_Hair', 'Bushy_Eyebrows',      
@@ -89,13 +89,6 @@ class CELEBA(data.Dataset):
         """
         img = self.images[index]
         label = self.labels[self.split][index]
-
-        if self.augmentations is not None:
-            img = self.augmentations(np.array(img, dtype=np.uint8))
-
-        if self.is_transform:
-            img = self.transform_img(img)
-
         return [img] + label
 
     def transform_img(self, img):
