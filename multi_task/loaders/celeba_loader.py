@@ -63,7 +63,7 @@ class CELEBA(data.Dataset):
         base_path = '/'.join(self.all_files[0].split('/')[:-1])
         self.files[self.split] = list(map(lambda x: '/'.join([base_path, x]), set(map(lambda x:x.split('/')[-1], self.all_files)).intersection(set(selected_file_names))))
         self.images = []
-        for img_path in self.files:
+        for img_path in self.files[self.split]:
             img = imageio.imread(img_path.rstrip())
             self.images.append(img)
         self.images = np.vstack(self.images).reshape(-1, 218, 178, 3)
