@@ -33,12 +33,16 @@ class CELEBA(data.Dataset):
         self.labels = {}
 
         self.label_file = self.root+"/Anno/list_attr_celeba.txt"
+        self.selected_label_idx = [int(i) + 1 for i in params['tasks']]
+        print(self.selected_label_idx )
         label_map = {}
         with open(self.label_file, 'r') as l_file:
             labels = l_file.read().split('\n')[2:-1]
         for label_line in labels:
             f_name = re.sub('jpg', 'png', label_line.split(' ')[0])
-            label_txt = list(map(lambda x:int(x), re.sub('-1','0',label_line).split()[1:self.n_classes+1])) # TODO: get right label
+            label_line = re.sub('-1','0',label_line).split()
+            label_line = [label_line[i] for i in self.selected_label_idx]
+            label_txt = list(map(lambda x:int(x), label_line )) # TODO: get right label
             label_map[f_name]=label_txt
         
         self.subset = set()
@@ -74,7 +78,9 @@ class CELEBA(data.Dataset):
                                 'Male', 'Mouth_Slightly_Open', 'Mustache', 'Narrow_Eyes', 'No_Beard', 'Oval_Face', 'Pale_Skin', 
                                 'Pointy_Nose', 'Receding_Hairline', 'Rosy_Cheeks', 'Sideburns', 'Smiling', 'Straight_Hair', 'Wavy_Hair', 
                                 'Wearing_Earrings', 'Wearing_Hat', 'Wearing_Lipstick', 'Wearing_Necklace', 'Wearing_Necktie', 'Young']
-        self.class_names = self.class_names[:self.n_classes]
+        # self.class_names = self.class_names[:self.n_classes]
+        self.class_names = [self.class_names[int(i)] for i in params['tasks']]
+        print(self.class_names)
         label_txt_0 = np.ones(self.n_classes) * len(self.labels[self.split])
         label_txt_1 = np.zeros(self.n_classes)
         for l in tqdm(self.labels[self.split]):
@@ -145,11 +151,10 @@ if __name__ == '__main__':
     import torchvision
     import matplotlib.pyplot as plt
 
-    params = {'tasks': ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
-                      "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39"]}
+    params = {'tasks': ["2", "36"]}
     local_path = './PATH_FOR_CELEBA_DATASET'
-    subset = False
-    split='test'
+    subset = True
+    split='train'
     dst = CELEBA(params, local_path, is_transform=True, augmentations=None, subset=subset, split=split)
     bs = 4
     trainloader = data.DataLoader(dst, batch_size=bs, num_workers=0)
