@@ -99,29 +99,57 @@ def train_multi_task(params):
             loss_data = {}
             # Scaled back-propagation
             optimizer.zero_grad()
-            rep = model['rep'](images)
-            if len(rep) == 2: 
-                for i, t in enumerate(tasks):
-                    out_t = model[t](rep[i])
-                    loss_t = loss_fn[t](out_t, labels[t])
-                    loss_data[t] = loss_t.item() 
-                    if i > 0:
-                        loss = loss + scale[t]*loss_t
-                    else:
-                        loss = scale[t]*loss_t
-                loss.backward()
-                optimizer.step()
-            else:
-                for i, t in enumerate(tasks):
-                    out_t = model[t](rep)
-                    loss_t = loss_fn[t](out_t, labels[t])
-                    loss_data[t] = loss_t.item() 
-                    if i > 0:
-                        loss = loss + scale[t]*loss_t
-                    else:
-                        loss = scale[t]*loss_t
-                loss.backward()
-                optimizer.step()
+            if 'mnist' in params['dataset']: 
+                rep = model['rep'](images)
+                if len(rep) == 2: 
+                    for i, t in enumerate(tasks):
+                        out_t = model[t](rep[i])
+                        loss_t = loss_fn[t](out_t, labels[t])
+                        loss_data[t] = loss_t.item() 
+                        if i > 0:
+                            loss = loss + scale[t]*loss_t
+                        else:
+                            loss = scale[t]*loss_t
+                    loss.backward()
+                    optimizer.step()
+                else:
+                    for i, t in enumerate(tasks):
+                        out_t = model[t](rep)
+                        loss_t = loss_fn[t](out_t, labels[t])
+                        loss_data[t] = loss_t.item() 
+                        if i > 0:
+                            loss = loss + scale[t]*loss_t
+                        else:
+                            loss = scale[t]*loss_t
+                    loss.backward()
+                    optimizer.step()
+            elif 'celeb' in params['dataset']: 
+                if 'film' in params['dataset']: 
+                    for i, t in enumerate(tasks):
+                        rep = model['rep'](images, i)
+                        out_t = model[t](rep)
+                        loss_t = loss_fn[t](out_t, labels[t])
+                        loss_data[t] = loss_t.item() 
+                        if i > 0:
+                            loss = loss + scale[t]*loss_t
+                        else:
+                            loss = scale[t]*loss_t
+                    loss.backward()
+                    optimizer.step()
+                else: 
+                    rep = model['rep'](images, i)
+                    for i, t in enumerate(tasks):
+                        out_t = model[t](rep)
+                        loss_t = loss_fn[t](out_t, labels[t])
+                        loss_data[t] = loss_t.item() 
+                        if i > 0:
+                            loss = loss + scale[t]*loss_t
+                        else:
+                            loss = scale[t]*loss_t
+                    loss.backward()
+                    optimizer.step()
+            else: 
+                print('errorrrrrrrr')
             writer.add_scalar('training_loss', loss.item(), n_iter)
             for t in tasks:
                 writer.add_scalar('training_loss_{}'.format(t), loss_data[t], n_iter)
@@ -144,17 +172,31 @@ def train_multi_task(params):
                     labels_val[t] = batch_val[i+1]
                     labels_val[t] = labels_val[t].to(DEVICE)
 
-                val_rep = model['rep'](val_images)
-                if len(val_rep) == 2:
-                    for i, t in enumerate(tasks):
-                        out_t_val = model[t](val_rep[i])
-                        loss_t = loss_fn[t](out_t_val, labels_val[t], val=True)
-                        tot_val_loss += scale[t]*loss_t.item()
-                else:
-                    for t in tasks:
-                        out_t_val = model[t](val_rep)
-                        loss_t = loss_fn[t](out_t_val, labels_val[t], val=True)
-                        tot_val_loss += scale[t]*loss_t.item()
+                if 'mnist' in params['dataset']: 
+                    val_rep = model['rep'](val_images)
+                    if len(val_rep) == 2:
+                        for i, t in enumerate(tasks):
+                            out_t_val = model[t](val_rep[i])
+                            loss_t = loss_fn[t](out_t_val, labels_val[t], val=True)
+                            tot_val_loss += scale[t]*loss_t.item()
+                    else:
+                        for t in tasks:
+                            out_t_val = model[t](val_rep)
+                            loss_t = loss_fn[t](out_t_val, labels_val[t], val=True)
+                            tot_val_loss += scale[t]*loss_t.item()
+                elif 'celeb' in params['dataset']: 
+                    if 'film' in params['dataset']: 
+                        for i, t in enumerate(tasks):
+                            val_rep = model['rep'](val_images, i)
+                            out_t_val = model[t](val_rep)
+                            loss_t = loss_fn[t](out_t_val, labels_val[t], val=True)
+                            tot_val_loss += scale[t]*loss_t.item()
+                    else: 
+                        val_rep = model['rep'](val_images)
+                        for i, t in enumerate(tasks):
+                            out_t_val = model[t](val_rep)
+                            loss_t = loss_fn[t](out_t_val, labels_val[t], val=True)
+                            tot_val_loss += scale[t]*loss_t.item()
                 num_val_batches+=1
         writer.add_scalar('validation_loss', tot_val_loss/len(val_dst), n_iter)
 
@@ -231,21 +273,41 @@ def test_multi_task(params, trial_identifier):
                 labels_test[t] = batch_test[i+1]
                 labels_test[t] = labels_test[t].to(DEVICE)
 
-            test_rep = model['rep'](test_images)
-            if len(test_rep) == 2:
-                for i, t in enumerate(tasks):
-                    out_t_test = model[t](test_rep[i])
-                    loss_t = loss_fn[t](out_t_test, labels_test[t])
-                    tot_loss['all'] += scale[t]*loss_t.item()
-                    tot_loss[t] += loss_t.item()
-                    metric[t].update(out_t_test, labels_test[t])
-            else:
-                for t in tasks:
-                    out_t_test = model[t](test_rep)
-                    loss_t = loss_fn[t](out_t_test, labels_test[t])
-                    tot_loss['all'] += scale[t]*loss_t.item()
-                    tot_loss[t] += loss_t.item()
-                    metric[t].update(out_t_test, labels_test[t])
+            
+            if 'mnist' in params['dataset']: 
+                test_rep = model['rep'](test_images)
+                if len(test_rep) == 2:
+                    for i, t in enumerate(tasks):
+                        out_t_test = model[t](test_rep[i])
+                        loss_t = loss_fn[t](out_t_test, labels_test[t])
+                        tot_loss['all'] += scale[t]*loss_t.item()
+                        tot_loss[t] += loss_t.item()
+                        metric[t].update(out_t_test, labels_test[t])
+                else:
+                    for t in tasks:
+                        out_t_test = model[t](test_rep)
+                        loss_t = loss_fn[t](out_t_test, labels_test[t])
+                        tot_loss['all'] += scale[t]*loss_t.item()
+                        tot_loss[t] += loss_t.item()
+                        metric[t].update(out_t_test, labels_test[t])
+            
+            elif 'celeb' in params['dataset']: 
+                if 'film' in params['dataset']: 
+                    for i, t in enumerate(tasks):
+                        test_rep = model['rep'](test_images, i)
+                        out_t_test = model[t](test_rep)
+                        loss_t = loss_fn[t](out_t_test, labels_test[t])
+                        tot_loss['all'] += scale[t]*loss_t.item()
+                        tot_loss[t] += loss_t.item()
+                        metric[t].update(out_t_test, labels_test[t])
+                else: 
+                    test_rep = model['rep'](test_images, i)
+                    for i, t in enumerate(tasks):
+                        out_t_test = model[t](test_rep)
+                        loss_t = loss_fn[t](out_t_test, labels_test[t])
+                        tot_loss['all'] += scale[t]*loss_t.item()
+                        tot_loss[t] += loss_t.item()
+                        metric[t].update(out_t_test, labels_test[t])
             num_test_batches+=1
         
         for t in tasks:

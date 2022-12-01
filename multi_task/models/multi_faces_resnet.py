@@ -161,21 +161,15 @@ class ResNetFilm(nn.Module):
             self.in_planes = planes * block.expansion
         return ResNetTaskLayer(layers)
 
-    def forward(self, x):
+    def forward(self, x, task):
         out = F.relu(self.bn1(self.conv1(x)))
-        out0 = self.layer1(out, 0)
-        out0 = self.layer2(out0, 0)
-        out0 = self.layer3(out0, 0)
-        out0 = self.layer4(out0, 0)
-        out0 = F.avg_pool2d(out0, 4)
-        out0 = out0.view(out0.size(0), -1)
-        out1 = self.layer1(out, 1)
-        out1 = self.layer2(out1, 1)
-        out1 = self.layer3(out1, 1)
-        out1 = self.layer4(out1, 1)
-        out1 = F.avg_pool2d(out1, 4)
-        out1 = out1.view(out1.size(0), -1)
-        return out0, out1
+        out = self.layer1(out, task)
+        out = self.layer2(out, task)
+        out = self.layer3(out, task)
+        out = self.layer4(out, task)
+        out = F.avg_pool2d(out, 4)
+        out = out.view(out.size(0), -1)
+        return out
 
 
 class FaceAttributeDecoder(nn.Module):
