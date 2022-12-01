@@ -31,12 +31,15 @@ class CELEBA(data.Dataset):
         self.labels = {}
 
         self.label_file = self.root+"/Anno/list_attr_celeba.txt"
+        self.selected_label_idx = [int(i) + 1 for i in params['tasks']]
         label_map = {}
         with open(self.label_file, 'r') as l_file:
             labels = l_file.read().split('\n')[2:-1]
         for label_line in labels:
             f_name = re.sub('jpg', 'png', label_line.split(' ')[0])
-            label_txt = list(map(lambda x:int(x), re.sub('-1','0',label_line).split()[1:self.n_classes+1])) # TODO: get right label
+            label_line = re.sub('-1','0',label_line).split()
+            label_line = [label_line[i] for i in self.selected_label_idx]
+            label_txt = list(map(lambda x:int(x), label_line )) 
             label_map[f_name]=label_txt
 
         self.subset = set()
@@ -71,7 +74,8 @@ class CELEBA(data.Dataset):
                                 'Male', 'Mouth_Slightly_Open', 'Mustache', 'Narrow_Eyes', 'No_Beard', 'Oval_Face', 'Pale_Skin', 
                                 'Pointy_Nose', 'Receding_Hairline', 'Rosy_Cheeks', 'Sideburns', 'Smiling', 'Straight_Hair', 'Wavy_Hair', 
                                 'Wearing_Earrings', 'Wearing_Hat', 'Wearing_Lipstick', 'Wearing_Necklace', 'Wearing_Necktie', 'Young']
-        self.class_names = self.class_names[:self.n_classes]
+        self.class_names = [self.class_names[int(i)] for i in params['tasks']]
+        
 
         if len(self.files[self.split]) < 2:
             raise Exception("No files for split=[%s] found in %s" % (self.split, self.root))
