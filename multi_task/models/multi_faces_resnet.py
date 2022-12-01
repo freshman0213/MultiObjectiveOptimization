@@ -181,3 +181,16 @@ class FaceAttributeDecoder(nn.Module):
         x = self.linear(x)
         out = F.log_softmax(x, dim=1)
         return out
+
+if __name__ == '__main__':
+
+    model = ResNet(BasicBlock, [2,2,2,2])
+    pytorch_total_params = sum(p.numel() for p in model.parameters())
+    print('ResNet: ', pytorch_total_params)
+    model = ResNetFilm(BasicBlockFilm, [2,2,2,2])
+    pytorch_total_params = sum(p.numel() for p in model.parameters())
+    print('ResNetFilm: ', pytorch_total_params)
+    model = FaceAttributeDecoder()
+    pytorch_total_params = sum(p.numel() for p in model.parameters())
+    print('ResNetFilm: ', pytorch_total_params)
+

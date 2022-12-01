@@ -97,3 +97,18 @@ class MultiLeNetO(nn.Module):
         x = F.relu(x)
         x = self.fc2(x)
         return F.log_softmax(x, dim=1)
+
+
+if __name__ == '__main__':
+
+    params = {'dropout_rate': 0}
+
+    model = MultiLeNetR(params)
+    pytorch_total_params = sum(p.numel() for p in model.parameters())
+    print('MultiFilmLeNetR: ', pytorch_total_params)
+    model = MultiFilmLeNetR(params)
+    pytorch_total_params = sum(p.numel() for p in model.parameters())
+    print('MultiFilmLeNetR: ', pytorch_total_params)
+    model = MultiLeNetO(params)
+    pytorch_total_params = sum(p.numel() for p in model.parameters())
+    print('MultiLeNetO: ', pytorch_total_params)
