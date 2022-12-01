@@ -148,12 +148,12 @@ def train_multi_task(params):
                 if len(val_rep) == 2:
                     for i, t in enumerate(tasks):
                         out_t_val = model[t](val_rep[i])
-                        loss_t = loss_fn[t](out_t_val, labels_val[t])
+                        loss_t = loss_fn[t](out_t_val, labels_val[t], val=True)
                         tot_val_loss += scale[t]*loss_t.item()
                 else:
                     for t in tasks:
                         out_t_val = model[t](val_rep)
-                        loss_t = loss_fn[t](out_t_val, labels_val[t])
+                        loss_t = loss_fn[t](out_t_val, labels_val[t], val=True)
                         tot_val_loss += scale[t]*loss_t.item()
                 num_val_batches+=1
         writer.add_scalar('validation_loss', tot_val_loss/len(val_dst), n_iter)
