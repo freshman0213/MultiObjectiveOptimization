@@ -6,11 +6,6 @@ from torch.autograd import Variable
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
-from keras.layers import (
-    Conv2D, BatchNormalization, Activation,
-    MaxPooling2D, Dense, Flatten
-)
-
 class FiLM(nn.Module):
   """
   A Feature-wise Linear Modulation Layer from
