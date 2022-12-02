@@ -88,11 +88,11 @@ class two_conv_pool_film(nn.Module):
         self.conv2 = nn.Conv2d(F1, F2, kernel_size=3, padding='same')
         # remove bn for film
         # self.bn2 = nn.BatchNorm2d(F2) 
-        if film:
-            self.films = nn.ModuleList([FiLM(input_shape = (1, F2)) for _ in range(num_tasks)])
+        
+        self.films = nn.ModuleList([FiLM(input_shape = (1, F2)) for _ in range(num_tasks)])
     def forward(self, x, task):
         x = F.relu(self.bn1(self.conv1(x)))
-        x = F.relu(self.bn2(self.conv2(x)))
+        x = F.relu(self.films[task](self.conv2(x)))
         x = F.max_pool2d(x, 2)
         return out
 
@@ -107,13 +107,13 @@ class three_conv_pool_film(nn.Module):
         self.conv3 = nn.Conv2d(F2, F3, kernel_size=3, padding='same')
         # remove bn for film
         # self.bn3 = nn.BatchNorm2d(F3)
-        if film:
-            self.films = nn.ModuleList([FiLM(input_shape = (1, F3)) for _ in range(num_tasks)])
+
+        self.films = nn.ModuleList([FiLM(input_shape = (1, F3)) for _ in range(num_tasks)])
 
     def forward(self, x, task):
         x = F.relu(self.bn1(self.conv1(x)))
         x = F.relu(self.bn2(self.conv2(x)))
-        x = self.films[task](self.conv2(x))
+        x = F.relu(self.films[task](self.conv3(x)))
         x = F.max_pool2d(x, 2)
         return x
 
