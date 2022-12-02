@@ -25,6 +25,7 @@ import datasets
 import metrics
 import model_selector
 from min_norm_solvers import MinNormSolver, gradient_normalizers
+from itertools import cycle
 
 NUM_EPOCHS = 100
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -82,7 +83,7 @@ def train_multi_task_cifar_svhn(params):
             model[m].train()
 
         ##### Training #####
-        for cifar_batch, svhn_batch in zip(*train_loader):
+        for cifar_batch, svhn_batch in zip(train_loader[0], cycle(train_loader[1])):
             n_iter += 1
             # First member is always images
             batch = [cifar_batch, svhn_batch]
