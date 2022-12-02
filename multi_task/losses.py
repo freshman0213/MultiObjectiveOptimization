@@ -85,3 +85,9 @@ def get_loss(params):
         for t in params['tasks']:
             loss_fn[t] = nll
         return loss_fn
+
+    if 'cifar_svhn' in params['dataset'] or 'cifar_svhn_film' in params['dataset']:
+        loss_fn = {}
+        for t in params['tasks']:
+            loss_fn[t] = nll
+        return loss_fn

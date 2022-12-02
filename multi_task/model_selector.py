@@ -2,6 +2,7 @@ from models.multi_lenet import MultiLeNetO, MultiLeNetR, MultiFilmLeNetR
 from models.segnet import SegnetEncoder, SegnetInstanceDecoder, SegnetSegmentationDecoder, SegnetDepthDecoder
 from models.pspnet import SegmentationDecoder, get_segmentation_encoder
 from models.multi_faces_resnet import ResNet, ResNetFilm, FaceAttributeDecoder, BasicBlock, BasicBlockFilm
+from models.vgg5 import MultiVgg5R, MultiVgg5R_film, MultiVgg5O
 import torchvision.models as model_collection
 import torch.nn as nn
 import torch
@@ -100,3 +101,30 @@ def get_model(params):
             model[t].to(DEVICE)
         return model
 
+    if 'cifar_svhn_film' in data:
+        model = {}
+        model['rep'] = MultiVgg5R_film()
+        print(model['rep'])
+        if params['parallel']:
+            model['rep'] = nn.DataParallel(model['rep'])
+        model['rep'].to(DEVICE)
+        for t in params['tasks']:
+            model[t] = MultiVgg5O()
+            if params['parallel']:
+                model[t] = nn.DataParallel(model[t])
+            model[t].to(DEVICE)
+        return model
+    if 'cifar_svhn' in data:
+        model = {}
+        model['rep'] = MultiVgg5R()
+        print(model['rep'])
+        if params['parallel']:
+            model['rep'] = nn.DataParallel(model['rep'])
+        model['rep'].to(DEVICE)
+        for t in params['tasks']:
+            model[t] = MultiVgg5O()
+            if params['parallel']:
+                model[t] = nn.DataParallel(model[t])
+            model[t].to(DEVICE)
+        return model
+    
