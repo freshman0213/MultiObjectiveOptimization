@@ -2,7 +2,7 @@
 *.pt
 runs/
 saved_models/
-PATH_FOR_MULTIMNIST_DATASET/
-PATH_FOR_CELEBA_DATASET/
+PATH_FOR_*/
 .vscode/
 .DS_STORE
+multi_task/multi_fasion_mnist_loader.py

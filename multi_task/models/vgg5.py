@@ -39,7 +39,7 @@ class two_conv_pool(nn.Module):
         x = F.relu(self.bn1(self.conv1(x)))
         x = F.relu(self.bn2(self.conv2(x)))
         x = F.max_pool2d(x, 2)
-        return out
+        return x
 
 
 class three_conv_pool(nn.Module):
@@ -57,14 +57,14 @@ class three_conv_pool(nn.Module):
         x = F.relu(self.bn2(self.conv2(x)))
         x = F.relu(self.bn3(self.conv3(x)))
         x = F.max_pool2d(x, 2)
-        return out
+        return x
 
 
 
 # adapted from 
 # https://github.com/kkweon/mnist-competition/blob/master/vgg5.py?fbclid=IwAR3KCzA88m1Ki15YrVkgH0fGUfwoqxq0oWfUIGEIm2JDXeizeYE_7p6Dx1E
 class MultiVgg5R(nn.Module):
-    def __init__(self, params):
+    def __init__(self):
         super(MultiVgg5R, self).__init__()
         self.layer1 = two_conv_pool(3, 32, 32)
         self.layer2 = two_conv_pool(32, 64, 64)
@@ -94,7 +94,7 @@ class two_conv_pool_film(nn.Module):
         x = F.relu(self.bn1(self.conv1(x)))
         x = F.relu(self.films[task](self.conv2(x)))
         x = F.max_pool2d(x, 2)
-        return out
+        return x
 
 
 class three_conv_pool_film(nn.Module):
@@ -118,7 +118,7 @@ class three_conv_pool_film(nn.Module):
         return x
 
 class MultiVgg5R_film(nn.Module):
-    def __init__(self, params):
+    def __init__(self):
         super(MultiVgg5R_film, self).__init__()
         self.layer1 = two_conv_pool_film(3, 32, 32)
         self.layer2 = two_conv_pool_film(32, 64, 64)
@@ -134,7 +134,7 @@ class MultiVgg5R_film(nn.Module):
         return x
 
 class MultiVgg5O(nn.Module):
-    def __init__(self, params):
+    def __init__(self):
         super(MultiVgg5O, self).__init__()
         self.fc1 = nn.Linear(1024, 512)
         self.fc2 = nn.Linear(512, 512)

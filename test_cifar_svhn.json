@@ -1,0 +1,12 @@
+{
+    "hyper_parameters": ["lr"],
+    "lr": [0.001],
+    "dropout_rate": [0.1],
+    "optimizer": "SGD", 
+    "batch_size": 128,
+    "dataset": "cifar_svhn",
+    "tasks": ["cifar", "svhn"],
+    "scales": {"cifar":0.5, "svhn":0.5},
+    "parallel": true
+}
+

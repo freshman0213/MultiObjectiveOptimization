@@ -4,6 +4,7 @@ from loaders.multi_mnist_loader import MNIST
 from loaders.cityscapes_loader import CITYSCAPES
 from loaders.segmentation_augmentations import *
 from loaders.celeba_loader import CELEBA
+from torchvision.datasets import CIFAR10, SVHN
 
 # Setup Augmentations
 cityscapes_augmentations= Compose([RandomRotate(10),
@@ -46,3 +47,44 @@ def get_dataset(params, configs):
         val_loader = torch.utils.data.DataLoader(val_dst, batch_size=params['batch_size'], num_workers=4)
         #TODO
         return train_loader, train_dst, val_loader, val_dst, val_loader, val_dst
+
+    if 'cifar_svhn' in params['dataset']: 
+        
+        transform = transforms.Compose([
+            transforms.ToTensor()
+        ])
+        
+        train_val = CIFAR10(root='./PATH_FOR_CIFAR10_DATASET', train=True,
+                            download=True, transform=transform)
+        train_size = int(len(train_val)*0.8)
+        val_size = len(train_val) - train_size
+        print('CIFAR10 - train:', train_size)
+        print('CIFAR10 - val:', val_size)
+
+        cifar_train_val = torch.utils.data.random_split(train_val, [train_size, val_size], generator=torch.Generator().manual_seed(42))
+        cifar_train_loader = torch.utils.data.DataLoader(cifar_train_val[0], batch_size=1, shuffle=False, num_workers=4, drop_last=True)
+        cifar_val_loader = torch.utils.data.DataLoader(cifar_train_val[1], batch_size=1, shuffle=False, num_workers=4, drop_last=True)
+
+        cifar_test_dst = CIFAR10(root='./PATH_FOR_CIFAR10_DATASET', train=False,
+                            download=True, transform=transform)
+        cifar_test_loader = torch.utils.data.DataLoader(cifar_test_dst, batch_size=100, shuffle=False, num_workers=4)
+
+
+        train_val = SVHN(root='./PATH_FOR_SVHN_DATASET', split='train',
+                            download=True, transform=transform)
+        train_size = int(len(train_val)*0.8)
+        val_size = len(train_val) - train_size
+        print('SVHN - train:', train_size)
+        print('SVHN - val:', val_size)
+        svhn_train_val = torch.utils.data.random_split(train_val, [train_size, val_size], generator=torch.Generator().manual_seed(42))
+        svhn_train_loader = torch.utils.data.DataLoader(svhn_train_val[0], batch_size=1, shuffle=False, num_workers=4, drop_last=True)
+        svhn_val_loader = torch.utils.data.DataLoader(svhn_train_val[1], batch_size=1, shuffle=False, num_workers=4, drop_last=True)
+
+
+        svhn_test_dst = SVHN(root='./PATH_FOR_SVHN_DATASET', split='test',
+                            download=True, transform=transform)
+        svhn_test_loader = torch.utils.data.DataLoader(cifar_test_dst, batch_size=100, shuffle=False, num_workers=4)
+
+        return (cifar_train_loader, svhn_train_loader), (cifar_train_val[0], svhn_train_val[0]), \
+               (cifar_val_loader, svhn_val_loader), (cifar_train_val[1], svhn_train_val[1]), \
+               (cifar_test_loader, svhn_test_loader), (cifar_test_dst, svhn_test_dst)

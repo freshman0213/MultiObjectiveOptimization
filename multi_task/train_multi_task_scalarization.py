@@ -4,6 +4,7 @@ import json
 import torch
 import numpy as np
 from train_multi_task import train_multi_task, test_multi_task
+from train_multi_task_cifar_svhn import train_multi_task_cifar_svhn, test_multi_task_cifar_svhn
 
 @click.command()
 @click.option('--param_file', default='params.json', help='JSON parameters file')
@@ -44,13 +45,21 @@ def train_multi_task_scalarization(param_file):
         trial_identifier = '|'.join(trial_identifier)
         if not os.path.exists("./saved_models/{}_model.pkl".format(trial_identifier)):
             # Trian the multi-task model with specific params
-            train_multi_task(trial_params)
+            print(trial_params)
+            if 'cifar_svhn' in trial_params['dataset']:
+                print('call train_multi_task_cifar_svhn')
+                train_multi_task_cifar_svhn(trial_params)
+            else: 
+                train_multi_task(trial_params)
 
         # Retrieve the best model's performance
         if not os.path.exists("./saved_models/{}_model.pkl".format(trial_identifier)):
             continue
         tasks = fixed_params['tasks']
-        testing_loss, testing_metric = test_multi_task(trial_params, trial_identifier)
+        if 'cifar_svhn' in trial_params['dataset']:
+            testing_loss, testing_metric = test_multi_task_cifar_svhn(trial_params, trial_identifier)
+        else: 
+            testing_loss, testing_metric = test_multi_task(trial_params, trial_identifier)
         # Check whether it is on the Pareto Frontier
         non_dominated = True
         for x in pareto_frontier:
