@@ -70,7 +70,7 @@ def get_dataset(params, configs):
         
         cifar_train_dst = CustomWrapper(cifar_train_val[0], transforms.Compose([cifar_augmentation, cifar_normalization]))
         cifar_train_loader = torch.utils.data.DataLoader(cifar_train_dst, batch_size=params['batch_size'], shuffle=True, num_workers=4, drop_last=True)
-        cifar_val_dst = CustomWrapper(cifar_train_dst[1], cifar_normalization)
+        cifar_val_dst = CustomWrapper(cifar_train_val[1], cifar_normalization)
         cifar_val_loader = torch.utils.data.DataLoader(cifar_val_dst, batch_size=params['batch_size'], shuffle=False, num_workers=4, drop_last=True)
 
         cifar_test_dst = CIFAR10(root='./PATH_FOR_CIFAR10_DATASET', train=False, download=True, transform=cifar_normalization)
