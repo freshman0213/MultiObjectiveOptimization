@@ -78,7 +78,7 @@ def train_multi_task_cifar_svhn(params):
         scale[t] = float(params['scales'][t])
     n_iter = 0
     best_val_loss = np.Inf
-    for epoch in tqdm(range(5)):
+    for epoch in tqdm(range(NUM_EPOCHS)):
         start = timer()
         print('Epoch {} Started'.format(epoch))
 
@@ -178,7 +178,6 @@ def test_multi_task_cifar_svhn(params, trial_identifier):
 
     loss_fn = losses.get_loss(params)
     metric = metrics.get_metrics(params)
-    print(metrics)
 
     state = torch.load("./saved_models/{}_model.pkl".format(trial_identifier))
 
