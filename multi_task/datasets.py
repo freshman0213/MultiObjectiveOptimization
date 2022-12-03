@@ -93,7 +93,7 @@ def get_dataset(params, configs):
             transforms.ToTensor(),
             transforms.Normalize((0.4376821, 0.4437697, 0.47280442), (0.19803012, 0.20101562, 0.19703614))
         ])
-        svhn_train_dst = CustomWrapper(svhn_train_val[0], transforms.Compose(svhn_augmentation, svhn_normalization))
+        svhn_train_dst = CustomWrapper(svhn_train_val[0], transforms.Compose([svhn_augmentation, svhn_normalization]))
         svhn_train_loader = torch.utils.data.DataLoader(svhn_train_dst, batch_size=params['batch_size'], shuffle=True, num_workers=4, drop_last=True)
         svhn_val_dst = CustomWrapper(svhn_train_val[1], svhn_normalization)
         svhn_val_loader = torch.utils.data.DataLoader(svhn_val_dst, batch_size=params['batch_size'], shuffle=False, num_workers=4, drop_last=True)
