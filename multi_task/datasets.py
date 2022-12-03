@@ -87,13 +87,13 @@ def get_dataset(params, configs):
         svhn_test_loader = torch.utils.data.DataLoader(svhn_test_dst, batch_size=params['batch_size'], shuffle=False, num_workers=4)
 
 
-        for batch in cifar_train_loader:
-            print(batch[0][0], batch[1][0])
-            break
+        # for batch in cifar_train_loader:
+        #     print(batch[0][0], batch[1][0])
+        #     break
 
-        for batch in svhn_train_loader:
-            print(batch[0][0], batch[1][0])
-            break
+        # for batch in svhn_train_loader:
+        #     print(batch[0][0], batch[1][0])
+        #     break
 
         return (cifar_train_loader, svhn_train_loader), (cifar_train_val[0], svhn_train_val[0]), \
                (cifar_val_loader, svhn_val_loader), (cifar_train_val[1], svhn_train_val[1]), \

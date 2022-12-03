@@ -27,7 +27,7 @@ import model_selector
 from min_norm_solvers import MinNormSolver, gradient_normalizers
 from itertools import cycle
 
-NUM_EPOCHS = 30
+NUM_EPOCHS = 100
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 def train_multi_task_cifar_svhn(params):
@@ -246,9 +246,9 @@ def test_multi_task_cifar_svhn(params, trial_identifier, test_loader=None, test_
             metric_results = metric[t].get_result()
             for metric_key in metric_results:
                 testing_metric[t] = metric_results[metric_key].item()
-                print(testing_metric[t])
+                # print(testing_metric[t])
                 if n_iter > 0:
-                    writer.add_scalar('metric_{}_{}'.format(metric_key, t), metric_results[metric_key], n_iter) 
+                    writer.add_scalar('test_metric_{}_{}'.format(metric_key, t), metric_results[metric_key], n_iter) 
             metric[t].reset()
         testing_loss['all'] = tot_loss['all']/(num_test_batches)
 
