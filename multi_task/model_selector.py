@@ -104,7 +104,7 @@ def get_model(params):
     if 'cifar_svhn_film' in data:
         model = {}
         model['rep'] = MultiVgg5R_film()
-        # print(model['rep'])
+        print(model['rep'])
         if params['parallel']:
             model['rep'] = nn.DataParallel(model['rep'])
         model['rep'].to(DEVICE)
