@@ -75,7 +75,7 @@ def train_multi_task_cifar_svhn(params):
         scale[t] = float(params['scales'][t])
     n_iter = 0
     best_val_loss = np.Inf
-    for epoch in tqdm(range(NUM_EPOCHS)):
+    for epoch in tqdm(range(5)):
         start = timer()
         print('Epoch {} Started'.format(epoch))
 
@@ -125,9 +125,8 @@ def train_multi_task_cifar_svhn(params):
         num_val_batches = 0
         with torch.no_grad():
             for cifar_batch_val, svhn_batch_val in zip(*val_loader):
-                batch_val_list = [cifar_batch_val, svhn_batch_val]
+                batch_val = [cifar_batch_val, svhn_batch_val]
                 for i, t in enumerate(tasks):
-                    batch_val = batch_val_list[i]
                     val_images = batch_val[i][0].to(DEVICE)
                     labels_val = batch_val[i][1].to(DEVICE)
                     
@@ -172,10 +171,11 @@ def train_multi_task_cifar_svhn(params):
 def test_multi_task_cifar_svhn(params, trial_identifier):
     with open('configs.json') as config_params:
         configs = json.load(config_params)
-    _, _, _, _, _, _, _, _, test_loader, test_dst = datasets.get_dataset(params, configs)
+    _, _, _, _, test_loader, test_dst = datasets.get_dataset(params, configs)
 
     loss_fn = losses.get_loss(params)
     metric = metrics.get_metrics(params)
+    print(metrics)
 
     state = torch.load("./saved_models/{}_model.pkl".format(trial_identifier))
 
@@ -210,10 +210,9 @@ def test_multi_task_cifar_svhn(params, trial_identifier):
     with torch.no_grad():
 
         for cifar_batch_test, svhn_batch_test in zip(*test_loader):
-            batch_test_list = [cifar_batch_test, svhn_batch_test]
+            batch_test = [cifar_batch_test, svhn_batch_test]
             for i, t in enumerate(tasks):
 
-                batch_test = batch_test_list[i]
                 test_images = batch_test[i][0].to(DEVICE)
                 labels_test = batch_test[i][1].to(DEVICE)
 
