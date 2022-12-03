@@ -169,7 +169,7 @@ def train_multi_task_cifar_svhn(params):
                 else:
                     raise
             torch.save(state, "./saved_models/{}_model.pkl".format(params['exp_id']))
-            test_multi_task_cifar_svhn(params, params['exp_id'], test_loader=test_loader, test_dst = test_dst, model=model, writer=writer, n_iter=n_iter)
+            test_multi_task_cifar_svhn(params, params['exp_id'], test_loader=test_loader, test_dst=test_dst, model=model, writer=writer, n_iter=n_iter)
         
         end = timer()
         print('Epoch ended in {}s'.format(end - start))
@@ -180,9 +180,7 @@ def test_multi_task_cifar_svhn(params, trial_identifier, test_loader=None, test_
         configs = json.load(config_params)
     if test_loader == None:
         _, _, _, _, test_loader, test_dst = datasets.get_dataset(params, configs)
-    
-    writer = SummaryWriter(log_dir='runs/{}_{}'.format(params['exp_id'], datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")))
-    
+      
     loss_fn = losses.get_loss(params)
     metric = metrics.get_metrics(params)
 
