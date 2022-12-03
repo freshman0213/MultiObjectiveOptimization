@@ -27,7 +27,7 @@ import model_selector
 from min_norm_solvers import MinNormSolver, gradient_normalizers
 from itertools import cycle
 
-NUM_EPOCHS = 100
+NUM_EPOCHS = 30
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 def train_multi_task_cifar_svhn(params):
@@ -112,12 +112,11 @@ def train_multi_task_cifar_svhn(params):
                 else:
                     loss = scale[t]*loss_t
 
-        loss.backward()
-        optimizer.step()
-
-        writer.add_scalar('training_loss', loss.item(), n_iter)
-        for t in tasks:
-            writer.add_scalar('training_loss_{}'.format(t), loss_data[t], n_iter)
+            loss.backward()
+            optimizer.step()
+            writer.add_scalar('training_loss', loss.item(), n_iter)
+            for t in tasks:
+                writer.add_scalar('training_loss_{}'.format(t), loss_data[t], n_iter)
         scheduler.step()
 
         for m in model:
@@ -125,6 +124,7 @@ def train_multi_task_cifar_svhn(params):
 
         ##### Validation #####
         tot_val_loss = 0.0
+        val_loss_t = [0.0, 0.0] 
         num_val_batches = 0
         with torch.no_grad():
             for cifar_batch_val, svhn_batch_val in zip(*val_loader):
@@ -140,11 +140,14 @@ def train_multi_task_cifar_svhn(params):
 
                     out_t_val = model[t](val_rep)
                     loss_t = loss_fn[t](out_t_val, labels_val, val=True)
+                    val_loss_t[i] += loss_t.item()
                     tot_val_loss += scale[t]*loss_t.item()
-                    writer.add_scalar('validation_loss_{}'.format(t), loss_t.item(), n_iter)
+                    # writer.add_scalar('validation_loss_{}'.format(t), loss_t.item(), n_iter)
 
             num_val_batches+=1
-        writer.add_scalar('validation_loss', tot_val_loss/len(val_dst), n_iter)
+        for i, t in enumerate(tasks):
+             writer.add_scalar('validation_loss_{}'.format(t), val_loss_t[i]/len(val_dst[i]), n_iter)
+        writer.add_scalar('validation_loss', tot_val_loss/(len(val_dst[0])+len(val_dst[1])), n_iter)
 
         # Early Stopping
         if (tot_val_loss < best_val_loss):
@@ -166,34 +169,43 @@ def train_multi_task_cifar_svhn(params):
                 else:
                     raise
             torch.save(state, "./saved_models/{}_model.pkl".format(params['exp_id']))
+            test_multi_task_cifar_svhn(params, params['exp_id'], test_loader=test_loader, test_dst = test_dst, model=model, writer=writer, n_iter=n_iter)
         
         end = timer()
         print('Epoch ended in {}s'.format(end - start))
 
 
-def test_multi_task_cifar_svhn(params, trial_identifier):
+def test_multi_task_cifar_svhn(params, trial_identifier, test_loader=None, test_dst=None, model=None, writer=None, n_iter=-1):
     with open('configs.json') as config_params:
         configs = json.load(config_params)
-    _, _, _, _, test_loader, test_dst = datasets.get_dataset(params, configs)
-
+    if test_loader == None:
+        _, _, _, _, test_loader, test_dst = datasets.get_dataset(params, configs)
+    
+    writer = SummaryWriter(log_dir='runs/{}_{}'.format(params['exp_id'], datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")))
+    
     loss_fn = losses.get_loss(params)
     metric = metrics.get_metrics(params)
 
-    state = torch.load("./saved_models/{}_model.pkl".format(trial_identifier))
-
-    model = model_selector.get_model(params)
-    model['rep'].load_state_dict(state['model_rep'])
-
     tasks = params['tasks']
     all_tasks = params['tasks']
+
+    if model == None:
+        state = torch.load("./saved_models/{}_model.pkl".format(trial_identifier))
+
+        model = model_selector.get_model(params)
+        model['rep'].load_state_dict(state['model_rep'])
+
+        for t in tasks:
+            key_name = 'model_{}'.format(t)
+            model[t].load_state_dict(state[key_name])
+
+    
 
     scale = {}
     for t in tasks:
         scale[t] = float(params['scales'][t])
 
-    for t in tasks:
-        key_name = 'model_{}'.format(t)
-        model[t].load_state_dict(state[key_name])
+    
 
     # ##### Testing #####
     tot_loss = {}
@@ -229,15 +241,17 @@ def test_multi_task_cifar_svhn(params, trial_identifier):
                 tot_loss[t] += loss_t.item()
                 metric[t].update(out_t_test, labels_test)
                     
-        num_test_batches+=1
+            num_test_batches+=1
         
         for t in tasks:
             testing_loss[t] = tot_loss[t]/num_test_batches
             metric_results = metric[t].get_result()
             for metric_key in metric_results:
-                testing_metric[t] = metric_results[metric_key].item() 
-                # writer.add_scalar('metric_{}_{}'.format(metric_key, t), metric_results[metric_key], n_iter) 
+                testing_metric[t] = metric_results[metric_key].item()
+                print(testing_metric[t])
+                if n_iter > 0:
+                    writer.add_scalar('metric_{}_{}'.format(metric_key, t), metric_results[metric_key], n_iter) 
             metric[t].reset()
-        testing_loss['all'] = tot_loss['all']/len(test_dst)
+        testing_loss['all'] = tot_loss['all']/(num_test_batches)
 
         return testing_loss, testing_metric

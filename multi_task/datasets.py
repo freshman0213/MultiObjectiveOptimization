@@ -51,7 +51,8 @@ def get_dataset(params, configs):
     if 'cifar_svhn' in params['dataset']: 
         
         transform = transforms.Compose([
-            transforms.ToTensor()
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         ])
         
         train_val = CIFAR10(root='./PATH_FOR_CIFAR10_DATASET', train=True,
@@ -62,7 +63,7 @@ def get_dataset(params, configs):
         print('CIFAR10 - val:', val_size)
 
         cifar_train_val = torch.utils.data.random_split(train_val, [train_size, val_size], generator=torch.Generator().manual_seed(42))
-        cifar_train_loader = torch.utils.data.DataLoader(cifar_train_val[0], batch_size=params['batch_size'], shuffle=False, num_workers=4, drop_last=True)
+        cifar_train_loader = torch.utils.data.DataLoader(cifar_train_val[0], batch_size=params['batch_size'], shuffle=True, num_workers=4, drop_last=True)
         cifar_val_loader = torch.utils.data.DataLoader(cifar_train_val[1], batch_size=params['batch_size'], shuffle=False, num_workers=4, drop_last=True)
 
         cifar_test_dst = CIFAR10(root='./PATH_FOR_CIFAR10_DATASET', train=False,
@@ -77,7 +78,7 @@ def get_dataset(params, configs):
         print('SVHN - train:', train_size)
         print('SVHN - val:', val_size)
         svhn_train_val = torch.utils.data.random_split(train_val, [train_size, val_size], generator=torch.Generator().manual_seed(42))
-        svhn_train_loader = torch.utils.data.DataLoader(svhn_train_val[0], batch_size=params['batch_size'], shuffle=False, num_workers=4, drop_last=True)
+        svhn_train_loader = torch.utils.data.DataLoader(svhn_train_val[0], batch_size=params['batch_size'], shuffle=True, num_workers=4, drop_last=True)
         svhn_val_loader = torch.utils.data.DataLoader(svhn_train_val[1], batch_size=params['batch_size'], shuffle=False, num_workers=4, drop_last=True)
 
 

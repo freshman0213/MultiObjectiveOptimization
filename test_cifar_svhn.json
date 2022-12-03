@@ -1,7 +1,7 @@
 {
     "hyper_parameters": ["lr", "weight_decay"],
     "lr": [0.001],
-    "weight_decay": [0, 0.00001, 0.00005, 0.0001, 0.0005, 0.001, 0.005],
+    "weight_decay": [0.005],
     "optimizer": "SGD", 
     "batch_size": 256,
     "dataset": "cifar_svhn",
