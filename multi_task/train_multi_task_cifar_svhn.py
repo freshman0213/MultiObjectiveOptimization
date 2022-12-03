@@ -63,7 +63,7 @@ def train_multi_task_cifar_svhn(params):
     elif 'Adam' in params['optimizer']:
         optimizer = torch.optim.Adam(model_params, lr=params['lr'])
     elif 'SGD' in params['optimizer']:
-        if params.has_key('weight_decay'):
+        if 'weight_decay' in params:
             optimizer = torch.optim.SGD(model_params, lr=params['lr'], momentum=0.8, weight_decay=params['weight_decay'])
         else:
             optimizer = torch.optim.SGD(model_params, lr=params['lr'], momentum=0.8)
