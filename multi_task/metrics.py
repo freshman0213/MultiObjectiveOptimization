@@ -88,4 +88,7 @@ def get_metrics(params):
     if 'celeba' in params['dataset']:
         for t in params['tasks']:
             met[t] = RunningMetric(metric_type = 'ACC')
+    if 'cifar_svhn' in params['dataset'] or 'cifar_svhn_film' in params['dataset']:
+        for t in params['tasks']:
+            met[t] = RunningMetric(metric_type = 'ACC')
     return met
