@@ -53,8 +53,8 @@ def get_dataset(params, configs):
     if 'cifar_svhn' in params['dataset']: 
         
         train_val_dst = CIFAR10(root='./PATH_FOR_CIFAR10_DATASET', train=True, download=True)
-        train_size = int(len(train_val)*0.8)
-        val_size = len(train_val) - train_size
+        train_size = int(len(train_val_dst)*0.8)
+        val_size = len(train_val_dst) - train_size
         print('CIFAR10 - train:', train_size)
         print('CIFAR10 - val:', val_size)
         cifar_train_val = torch.utils.data.random_split(train_val_dst, [train_size, val_size], generator=torch.Generator().manual_seed(42))
@@ -70,33 +70,35 @@ def get_dataset(params, configs):
         
         cifar_train_dst = CustomWrapper(cifar_train_val[0], transforms.Compose([cifar_augmentation, cifar_normalization]))
         cifar_train_loader = torch.utils.data.DataLoader(cifar_train_dst, batch_size=params['batch_size'], shuffle=True, num_workers=4, drop_last=True)
-        cifar_val_dst = CustomWrapper(cifar_train_dst[1], transforms.Compose([cifar_augmentation, cifar_normalization]))
+        cifar_val_dst = CustomWrapper(cifar_train_dst[1], cifar_normalization)
         cifar_val_loader = torch.utils.data.DataLoader(cifar_val_dst, batch_size=params['batch_size'], shuffle=False, num_workers=4, drop_last=True)
 
         cifar_test_dst = CIFAR10(root='./PATH_FOR_CIFAR10_DATASET', train=False, download=True, transform=cifar_normalization)
         cifar_test_loader = torch.utils.data.DataLoader(cifar_test_dst, batch_size=params['batch_size'], shuffle=False, num_workers=4)
 
         
-        train_val = SVHN(root='./PATH_FOR_SVHN_DATASET', split='train', download=True)
-        train_size = int(len(train_val)*0.8)
-        val_size = len(train_val) - train_size
+        train_val_dst = SVHN(root='./PATH_FOR_SVHN_DATASET', split='train', download=True)
+        train_size = int(len(train_val_dst)*0.8)
+        val_size = len(train_val_dst) - train_size
         print('SVHN - train:', train_size)
         print('SVHN - val:', val_size)
-        svhn_train_val = torch.utils.data.random_split(train_val, [train_size, val_size], generator=torch.Generator().manual_seed(42))
+        svhn_train_val = torch.utils.data.random_split(train_val_dst, [train_size, val_size], generator=torch.Generator().manual_seed(42))
 
         svhn_augmentation = transforms.Compose(
-            transforms.RandomRotation(8),
-            transforms.RandomResizedCrop(32, (0.95, 1.05), (1, 1)),
-            transforms.RandomAffine(0, shear=0.15)
+            transforms.Pad(padding=2),
+            transforms.RandomCrop(size=(32, 32)),
+            transforms.ColorJitter(brightness=63. / 255., saturation=[0.5, 1.5], contrast=[0.2, 1.8]),
         )
         svhn_normalization = transforms.Compose(
             transforms.ToTensor(),
-            transforms.Normalize()
+            transforms.Normalize((0.4376821, 0.4437697, 0.47280442), (0.19803012, 0.20101562, 0.19703614))
         )
-        svhn_train_loader = torch.utils.data.DataLoader(svhn_train_val[0], batch_size=params['batch_size'], shuffle=True, num_workers=4, drop_last=True)
-        svhn_val_loader = torch.utils.data.DataLoader(svhn_train_val[1], batch_size=params['batch_size'], shuffle=False, num_workers=4, drop_last=True)
+        svhn_train_dst = CustomWrapper(svhn_train_val[0], transforms.Compose(svhn_augmentation, svhn_normalization))
+        svhn_val_dst = CustomWrapper(svhn_train_val[1], svhn_normalization)
+        svhn_train_loader = torch.utils.data.DataLoader(svhn_train_dst, batch_size=params['batch_size'], shuffle=True, num_workers=4, drop_last=True)
+        svhn_val_loader = torch.utils.data.DataLoader(svhn_val_dst, batch_size=params['batch_size'], shuffle=False, num_workers=4, drop_last=True)
 
-        svhn_test_dst = SVHN(root='./PATH_FOR_SVHN_DATASET', split='test', download=True, transform=transform)
+        svhn_test_dst = SVHN(root='./PATH_FOR_SVHN_DATASET', split='test', download=True, transform=svhn_normalization)
         svhn_test_loader = torch.utils.data.DataLoader(svhn_test_dst, batch_size=params['batch_size'], shuffle=False, num_workers=4)
 
 
@@ -108,6 +110,6 @@ def get_dataset(params, configs):
         #     print(batch[0][0], batch[1][0])
         #     break
 
-        return (cifar_train_loader, svhn_train_loader), (cifar_train_val[0], svhn_train_val[0]), \
-               (cifar_val_loader, svhn_val_loader), (cifar_train_val[1], svhn_train_val[1]), \
+        return (cifar_train_loader, svhn_train_loader), (cifar_train_dst, svhn_train_dst), \
+               (cifar_val_loader, svhn_val_loader), (cifar_val_dst, svhn_val_dst), \
                (cifar_test_loader, svhn_test_loader), (cifar_test_dst, svhn_test_dst)
