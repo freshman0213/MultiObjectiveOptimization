@@ -59,14 +59,14 @@ def get_dataset(params, configs):
         print('CIFAR10 - val:', val_size)
         cifar_train_val = torch.utils.data.random_split(train_val_dst, [train_size, val_size], generator=torch.Generator().manual_seed(42))
 
-        cifar_augmentation = transforms.Compose(
+        cifar_augmentation = transforms.Compose([
             transforms.RandomCrop(32, padding=4, padding_mode='reflect'),
             transforms.RandomHorizontalFlip(), 
-        )
-        cifar_normalization = transforms.Compose(
+        ])
+        cifar_normalization = transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)) 
-        )
+        ])
         
         cifar_train_dst = CustomWrapper(cifar_train_val[0], transforms.Compose([cifar_augmentation, cifar_normalization]))
         cifar_train_loader = torch.utils.data.DataLoader(cifar_train_dst, batch_size=params['batch_size'], shuffle=True, num_workers=4, drop_last=True)
@@ -84,18 +84,18 @@ def get_dataset(params, configs):
         print('SVHN - val:', val_size)
         svhn_train_val = torch.utils.data.random_split(train_val_dst, [train_size, val_size], generator=torch.Generator().manual_seed(42))
 
-        svhn_augmentation = transforms.Compose(
+        svhn_augmentation = transforms.Compose([
             transforms.Pad(padding=2),
             transforms.RandomCrop(size=(32, 32)),
             transforms.ColorJitter(brightness=63. / 255., saturation=[0.5, 1.5], contrast=[0.2, 1.8]),
-        )
-        svhn_normalization = transforms.Compose(
+        ])
+        svhn_normalization = transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize((0.4376821, 0.4437697, 0.47280442), (0.19803012, 0.20101562, 0.19703614))
-        )
+        ])
         svhn_train_dst = CustomWrapper(svhn_train_val[0], transforms.Compose(svhn_augmentation, svhn_normalization))
-        svhn_val_dst = CustomWrapper(svhn_train_val[1], svhn_normalization)
         svhn_train_loader = torch.utils.data.DataLoader(svhn_train_dst, batch_size=params['batch_size'], shuffle=True, num_workers=4, drop_last=True)
+        svhn_val_dst = CustomWrapper(svhn_train_val[1], svhn_normalization)
         svhn_val_loader = torch.utils.data.DataLoader(svhn_val_dst, batch_size=params['batch_size'], shuffle=False, num_workers=4, drop_last=True)
 
         svhn_test_dst = SVHN(root='./PATH_FOR_SVHN_DATASET', split='test', download=True, transform=svhn_normalization)
