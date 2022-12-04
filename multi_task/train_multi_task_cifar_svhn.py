@@ -29,6 +29,9 @@ from itertools import cycle
 
 NUM_EPOCHS = 100
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
+IDENTIFIER = '' 
+# change this to organize your tensorboard runs
+# example: 'film/fc/'
 
 def train_multi_task_cifar_svhn(params):
     with open('configs.json') as config_params:
@@ -47,7 +50,7 @@ def train_multi_task_cifar_svhn(params):
     exp_identifier = '|'.join(exp_identifier)
     params['exp_id'] = exp_identifier
 
-    writer = SummaryWriter(log_dir='runs/{}_{}'.format(params['exp_id'], datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")))
+    writer = SummaryWriter(log_dir='runs/{}{}_{}'.format(IDENTIFIER, params['exp_id'], datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")))
 
     train_loader, train_dst, val_loader, val_dst, test_loader, test_dst = datasets.get_dataset(params, configs)
     loss_fn = losses.get_loss(params)
@@ -114,9 +117,9 @@ def train_multi_task_cifar_svhn(params):
 
             loss.backward()
             optimizer.step()
-            writer.add_scalar('training_loss', loss.item(), n_iter)
+            writer.add_scalar('train/loss', loss.item(), n_iter)
             for t in tasks:
-                writer.add_scalar('training_loss_{}'.format(t), loss_data[t], n_iter)
+                writer.add_scalar('train/loss_{}'.format(t), loss_data[t], n_iter)
         scheduler.step()
 
         for m in model:
@@ -146,8 +149,8 @@ def train_multi_task_cifar_svhn(params):
 
             num_val_batches+=1
         for i, t in enumerate(tasks):
-             writer.add_scalar('validation_loss_{}'.format(t), val_loss_t[i]/len(val_dst[i]), n_iter)
-        writer.add_scalar('validation_loss', tot_val_loss/(len(val_dst[0])+len(val_dst[1])), n_iter)
+             writer.add_scalar('val/loss_{}'.format(t), val_loss_t[i]/len(val_dst[i]), n_iter)
+        writer.add_scalar('val/loss', tot_val_loss/(len(val_dst[0])+len(val_dst[1])), n_iter)
 
         # Early Stopping
         if (tot_val_loss < best_val_loss):
@@ -248,7 +251,7 @@ def test_multi_task_cifar_svhn(params, trial_identifier, test_loader=None, test_
                 testing_metric[t] = metric_results[metric_key].item()
                 # print(testing_metric[t])
                 if n_iter > 0:
-                    writer.add_scalar('test_metric_{}_{}'.format(metric_key, t), metric_results[metric_key], n_iter) 
+                    writer.add_scalar('test/test_metric_{}_{}'.format(metric_key, t), metric_results[metric_key], n_iter) 
             metric[t].reset()
         testing_loss['all'] = tot_loss['all']/(num_test_batches)
 

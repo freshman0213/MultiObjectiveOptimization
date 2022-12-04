@@ -1,6 +1,6 @@
 *.pyc
 *.pt
-runs/
+runs*/
 saved_models/
 PATH_FOR_*/
 .vscode/
