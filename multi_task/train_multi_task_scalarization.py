@@ -10,7 +10,7 @@ from train_multi_task_cifar_svhn import train_multi_task_cifar_svhn, test_multi_
 @click.option('--param_file', default='params.json', help='JSON parameters file')
 
 def train_multi_task_scalarization(param_file):
-    RESULT_FOLDER = './results/cifar_svhn/'
+    RESULT_FOLDER = './results/cifar_svhn_all_split/'
     with open(param_file) as json_params:
         params = json.load(json_params)
 
