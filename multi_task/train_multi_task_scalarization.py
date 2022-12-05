@@ -15,14 +15,16 @@ def train_multi_task_scalarization(param_file):
         params = json.load(json_params)
 
     hyper_parameters = params['hyper_parameters']
-    tuned_params = {}
+    tuned_params_keys = []
+    tuned_params_values = []
     num_trials = 1
     fixed_params = {}
     for (key, val) in params.items():
         if key == 'hyper_parameters':
             continue
         elif key in hyper_parameters:
-            tuned_params[key] = val
+            tuned_params_keys.append(key)
+            tuned_params_values.append(val)
             num_trials *= len(val)    
         else:
             fixed_params[key] = val
@@ -31,8 +33,10 @@ def train_multi_task_scalarization(param_file):
     for trial_idx in range(num_trials):
         trial_params = fixed_params.copy()
         # Setup the params for a new trial
-        for (key, val) in tuned_params.items():
-            trial_params[key] = val[trial_idx % len(val)]
+        cycle = 1
+        for key, values in zip(tuned_params_keys, tuned_params_values):
+            trial_params[key] = values[(trial_idx // cycle) % len(values)]
+            cycle *= len(values)
         trial_identifier = []
         for (key, val) in trial_params.items():
             if 'tasks' in key:
