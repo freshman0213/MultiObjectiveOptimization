@@ -9,7 +9,7 @@ Annie Ho|
 
 This repo includes modification to the Multi-LeNet network to include FiLM layers. Multi-VGG is also added to further investigate the effects of FiLM layers by adding task specific batch normalization. CIFAR-10/SVHN dataset is also combined for a new experiment setup for Multi-VGG. 
 
-Code for adding FiLM layers in ResNet is also added.
+Code for adding FiLM layers in ResNet is also included.
 
 
 # Requirements and References
@@ -17,7 +17,7 @@ The code uses the following Python packages and they are required: ``tensorboard
 
 
 We adapt and use some code snippets from:
-* https://github.com/kkweon/mnist-competition/blob/master/vgg5.py?fbclid=IwAR1LeFSiJ7ziHQyzDkaHLKVJmDKJw_Z_G4xLJ6hAsaB3PkjqbH0NIqZ52Ao
+* https://github.com/kkweon/mnist-competition/blob/master/vgg5.py?fbclid=IwAR1LeFSiJ7ziHQyzDkaHLKVJmDKJw_Z_G4xLJ6hAsaB3PkjqbH0NIqZ52Ao  [VGG]
 
 
 
