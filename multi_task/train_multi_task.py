@@ -24,7 +24,6 @@ import losses
 import datasets
 import metrics
 import model_selector
-from min_norm_solvers import MinNormSolver, gradient_normalizers
 
 NUM_EPOCHS = 100
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'

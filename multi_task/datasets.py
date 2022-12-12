@@ -8,9 +8,7 @@ from torchvision.datasets import CIFAR10, SVHN
 
 from loaders.custom_wrapper import CustomWrapper
 
-# Setup Augmentations
-cityscapes_augmentations= Compose([RandomRotate(10),
-                                   RandomHorizontallyFlip()])
+
 
 def global_transformer():
     return transforms.Compose([transforms.ToTensor(),
@@ -31,14 +29,6 @@ def get_dataset(params, configs):
         test_dst = MNIST(root=configs['mnist']['path'], split='test', download=True, transform=global_transformer())
         test_loader = torch.utils.data.DataLoader(test_dst, batch_size=100, shuffle=False, num_workers=4)
         return train_loader, train_dst, val_loader, val_dst, test_loader, test_dst
-
-    if 'cityscapes' in params['dataset']:
-        train_dst = CITYSCAPES(root=configs['cityscapes']['path'], is_transform=True, split=['train'], img_size=(configs['cityscapes']['img_rows'], configs['cityscapes']['img_cols']), augmentations=cityscapes_augmentations)
-        val_dst = CITYSCAPES(root=configs['cityscapes']['path'], is_transform=True, split=['val'], img_size=(configs['cityscapes']['img_rows'], configs['cityscapes']['img_cols']))
-
-        train_loader = torch.utils.data.DataLoader(train_dst, batch_size=params['batch_size'], shuffle=True, num_workers=4)
-        val_loader = torch.utils.data.DataLoader(val_dst, batch_size=params['batch_size'], num_workers=4)
-        return train_loader, train_dst, val_loader, val_dst
 
     if 'celeba' in params['dataset']:
         #TODO

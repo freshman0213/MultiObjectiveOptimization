@@ -24,7 +24,6 @@ import losses
 import datasets
 import metrics
 import model_selector
-from min_norm_solvers import MinNormSolver, gradient_normalizers
 from itertools import cycle
 
 NUM_EPOCHS = 100
@@ -249,7 +248,7 @@ def test_multi_task_cifar_svhn(params, trial_identifier, test_loader=None, test_
             metric_results = metric[t].get_result()
             for metric_key in metric_results:
                 testing_metric[t] = metric_results[metric_key].item()
-                # print(testing_metric[t])
+                print(testing_metric[t])
                 if n_iter > 0:
                     writer.add_scalar('test/test_metric_{}_{}'.format(metric_key, t), metric_results[metric_key], n_iter) 
             metric[t].reset()
