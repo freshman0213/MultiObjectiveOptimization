@@ -17,6 +17,7 @@ The code uses the following Python packages and they are required: ``tensorboard
 
 
 We adapt and use some code snippets from:
+* https://github.com/isl-org/MultiObjectiveOptimization [Scalarization Multi-task Training]
 * https://github.com/kkweon/mnist-competition/blob/master/vgg5.py?fbclid=IwAR1LeFSiJ7ziHQyzDkaHLKVJmDKJw_Z_G4xLJ6hAsaB3PkjqbH0NIqZ52Ao  [VGG]
 
 
