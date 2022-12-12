@@ -3,9 +3,9 @@
 This code repository includes the source code for the CS330 Final Project Fall 2022 by
 
 
-Li-Heng Lin
-Tz-Wei Mo
-Annie Ho
+Li-Heng Lin|
+Tz-Wei Mo|
+Annie Ho|
 
 This repo includes modification to the Multi-LeNet network to include FiLM layers. Multi-VGG is also added to further investigate the effects of FiLM layers by adding task specific batch normalization. CIFAR-10/SVHN dataset is also combined for a new experiment setup for Multi-VGG. 
 
